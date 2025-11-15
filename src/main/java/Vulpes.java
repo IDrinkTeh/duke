@@ -1,5 +1,12 @@
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.stream.Stream;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Vulpes {
     //TODO: TextUiTesting if time allows
@@ -7,8 +14,54 @@ public class Vulpes {
         System.out.println("____________________________________________________________");
         System.out.println("Canis Lupus? Vulpes vulpes!");
         System.out.println("All right, let's start planning. Who knows shorthand?");
-        var tasks = new ArrayList<Task>(); // array updated to arraylist now
-        tryCall(tasks); // first call
+        FileProcessor.readFile(FileProcessor.checkFile());
+    }
+
+    public static class FileProcessor {
+
+        private static final Path filePath = Paths.get("data", "Vulpes.txt"); // components for cross-platform compatibility
+
+        public static boolean checkFile() {
+            //TODO: corruption handling
+            return Files.exists(filePath);
+        }
+
+        private static void readFile(boolean exists) {
+            var tasks = new ArrayList<Task>(); // array updated to arraylist now
+            if (exists) { // if save file exists
+                try (Stream<String> lines = Files.lines(filePath)) { // retrieves all lines from file
+                    lines.forEach(line -> { // format we will use is 'type|status|description|by/from|to|'
+                        String[] taskParts = line.split("\\|");
+                        switch (taskParts[0]) {
+                            case "T":
+                                tasks.add(new Todo(taskParts[1]));
+                            case "D":
+                                tasks.add(new Deadline(taskParts[1], taskParts[2]));
+                            case "E":
+                                tasks.add(new Event(taskParts[1], taskParts[2], taskParts[3]));
+                        }
+                    });
+                } catch (IOException e) {
+                    System.err.println("Error reading the file: " + e.getMessage());
+                }
+            }
+            tryCall(tasks); // first call
+        }
+
+        private static void writeFile(ArrayList<Task> tasks) {
+            List<String> linesToWrite = tasks.stream()
+                    .map(Task::toFileString) // make each task to file format string
+                    .collect(Collectors.toList());
+
+            try {
+
+                Files.createDirectories(filePath.getParent()); // check  parent directory exists before writing
+
+                Files.write(filePath, linesToWrite); // overwrite old Vulpes file
+            } catch (IOException e) {
+                System.err.println("Error writing to the file: " + e.getMessage());
+            }
+        }
     }
 
     /*
@@ -202,7 +255,7 @@ public class Vulpes {
                             tasks.get(testIndex - 1).setStatus(false);
                             System.out.println("But it's... not done yet.");
                         } else { // delete
-                            storeUpdater(tasks, "", new String[] {params}); // empty priority is deletion flag
+                            listUpdater(tasks, "", new String[] {params}); // empty priority is deletion flag
                         }
 
                         if (!input[0].equals("delete")) System.out.println("  " + tasks.get(testIndex - 1).toString()); // if delete, updater handles printing
@@ -217,7 +270,7 @@ public class Vulpes {
                             throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (todo command cannot use time or date keywords like /by, /from, or /to! Try again with 'deadline' or 'event'?).");
                         }
 
-                        storeUpdater(tasks, "T", new String[] {params}); // pass to updater
+                        listUpdater(tasks, "T", new String[] {params}); // pass to updater
                         break;
 
                     case "deadline": // take in description and end
@@ -241,7 +294,7 @@ public class Vulpes {
                             throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (deadline command requires description and end time! Try again like 'deadline [description] /[end time]').");
                         }
 
-                        storeUpdater(tasks, "D",new String[] {deadlineDescription, deadlineEnd}); // pass to updater
+                        listUpdater(tasks, "D",new String[] {deadlineDescription, deadlineEnd}); // pass to updater
                         break;
 
                     case "event":
@@ -277,7 +330,7 @@ public class Vulpes {
                             throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event command requires description, start time and and end time! Try again like 'event [description] /from [start] /to [end]').");
                         }
 
-                        storeUpdater(tasks, "E",new String[] {eventDescription, eventStart, eventEnd}); // pass to updater
+                        listUpdater(tasks, "E",new String[] {eventDescription, eventStart, eventEnd}); // pass to updater
                         break;
 
                     default:
@@ -289,7 +342,7 @@ public class Vulpes {
         }
     }
 
-    public static void storeUpdater(ArrayList<Task> tasks, String priority, String [] params) { // announces changes, added is a deletion flag
+    public static void listUpdater(ArrayList<Task> tasks, String priority, String [] params) { // announces changes, added is a deletion flag
         if (!priority.isEmpty()) { // if list received a new item
             System.out.println("Another target added to the list:");
             switch (priority) { // add item to list according to type
