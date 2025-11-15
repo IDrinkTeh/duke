@@ -26,10 +26,10 @@ public class Vulpes {
         System.out.println("____________________________________________________________");
         Scanner scanner = new Scanner(System.in);
         String echo = scanner.nextLine();
-            while (!echo.equals("bye")) {
-                System.out.println(echo);
-                echo = scanner.nextLine();
-            }
+        while (!echo.equals("bye")) {
+            System.out.println(echo);
+            echo = scanner.nextLine();
+        }
         bye();
     }
 
@@ -199,7 +199,7 @@ public class Vulpes {
                     String todoContent = line.replace("todo ", "");
 
                     if (todoContent.contains(" /by") || todoContent.contains(" /from") || todoContent.contains(" /to")) { // check for mismatched command-delimiter use
-                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (todo command cannot have time or date keywords like /by, /from, or /to! Try again with 'deadline' or 'event'?).");
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (todo command cannot use time or date keywords like /by, /from, or /to! Try again with 'deadline' or 'event'?).");
                     }
 
                     line = line.replace("todo ", ""); // if all checks pass code executes
@@ -234,7 +234,7 @@ public class Vulpes {
                     index = added(stored, index);
                     break;
                 case "event":
-                    if (line.trim().equals("event")) { // check if there isn't a single param
+                    if (line.trim().equals("event")) { // check for missing params
                         throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event command requires description, start time and end time! Try again like 'event [description] /from [start] /to [end]').");
                     }
 
@@ -249,7 +249,7 @@ public class Vulpes {
                     }
 
                     String[] eventPartsFrom = eventContent.split(" /from ", 2); // split with "/from" to get description etc
-                    if (eventPartsFrom.length < 2) {
+                    if (eventPartsFrom.length < 2) { // check for mismatched command-delimiter use
                         throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event command requires /from keyword! Try again like 'event [description] /from [start] /to [end]').");
                     }
 
@@ -257,16 +257,15 @@ public class Vulpes {
                     String rest = eventPartsFrom[1];
 
                     String[] eventPartsTo = rest.split(" /to ", 2); // split again with  "/to" to get start and end
-                    if (eventPartsTo.length < 2) {
+                    if (eventPartsTo.length < 2) { // check for mismatched command-delimiter use
                         throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event command requires /to keyword! Try again like 'event [description] /from [start] /to [end]').");
                     }
 
                     String eventStart = eventPartsTo[0].trim();
                     String eventEnd = eventPartsTo[1].trim();
 
-                    // 4. Check if any part is empty
-                    if (eventDescription.isEmpty() || eventStart.isEmpty() || eventEnd.isEmpty()) {
-                        throw new VulpesException("The **event** command requires a description, start time (after /from), and end time (after /to).");
+                    if (eventDescription.isEmpty() || eventStart.isEmpty() || eventEnd.isEmpty()) { // check for missing params
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event command requires description, start time and and end time! Try again like 'event [description] /from [start] /to [end]').");
                     }
 
                     stored[index] = new Event(eventDescription, eventStart, eventEnd);
@@ -279,7 +278,6 @@ public class Vulpes {
         System.out.println("____________________________________________________________");
         caller(stored, index);
     }
-
 
     public static int added(Task[] stored, int index) { // array storage of items
         System.out.println("Another target added to the list:");
