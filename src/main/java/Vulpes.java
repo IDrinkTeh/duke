@@ -11,18 +11,18 @@ import java.util.stream.Collectors;
 public class Vulpes { // https://letterboxd.com/film/fantastic-mr-fox/
     //TODO: TextUiTesting if time allows
 
-    private final Storage storage;
-    private final TaskList tasks;
-    private final Ui ui;
+    private Storage storage;
+    private Ui ui;
+    private TaskList tasks;
 
     public Vulpes(String filePath) {
         ui = new Ui();
         storage = new Storage(filePath);
         try {
-            tasks = new TaskList(storage.load());
+            tasks = new TaskList(storage.load().getAllTasks());
         } catch (VulpesException e) {
             ui.showError("...");
-            tasks = new TaskList();
+            tasks = new TaskList(); // start with empty list
         }
     }
 
@@ -42,24 +42,23 @@ public class Vulpes { // https://letterboxd.com/film/fantastic-mr-fox/
                 ui.showLine();;
             }
         }
-        Storage.readFile(Storage.checkFile());
     }
 
-    public class Ui {
+    public static class Ui {
         private final Scanner scanner; // private
 
         public Ui() { // make scanner
             this.scanner = new Scanner(System.in);
         }
 
-        public static void showWelcome() {
+        public void showWelcome() {
             showLine();
             System.out.println("Canis Lupus? Vulpes vulpes!");
             System.out.println("All right, let's start planning. Who knows shorthand?");
             showLine();
         }
 
-        public static void showLine() {
+        public void showLine() {
             System.out.println("____________________________________________________________");
         }
 
@@ -131,7 +130,7 @@ public class Vulpes { // https://letterboxd.com/film/fantastic-mr-fox/
                     if (deadlineDescription.isEmpty() || deadlineBy.isEmpty()) {
                         throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (deadline description and time cannot be empty!).");
                     }
-                    // Create an AddCommand for a Deadline
+
                     return new AddCommand(Command.TaskType.DEADLINE, deadlineDescription, deadlineBy, null, null); // create if checks passed
 
                 case "event":
@@ -140,12 +139,12 @@ public class Vulpes { // https://letterboxd.com/film/fantastic-mr-fox/
                     }
                     String[] fromParts = params.split(" /from ", 2);
                     String eventDescription = fromParts[0].trim();
-                    if (fromParts.length < 2) { // Defensive check
-                        throw new VulpesException("Malformed event command. Missing text after /from.");
+                    if (fromParts.length < 2) {
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event requires dates after the keywords!).");
                     }
                     String[] toParts = fromParts[1].split(" /to ", 2);
-                    if (toParts.length < 2) { // Defensive check
-                        throw new VulpesException("Malformed event command. Missing text after /to.");
+                    if (toParts.length < 2) {
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event requires dates after the keywords!).");
                     }
                     String eventFrom = toParts[0].trim();
                     String eventTo = toParts[1].trim();
@@ -153,7 +152,7 @@ public class Vulpes { // https://letterboxd.com/film/fantastic-mr-fox/
                     if (eventDescription.isEmpty() || eventFrom.isEmpty() || eventTo.isEmpty()) {
                         throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event description, start time, and end time cannot be empty!).");
                     }
-                    // Create an AddCommand for an Event
+
                     return new AddCommand(Command.TaskType.EVENT, eventDescription, null, eventFrom, eventTo); // create if checks passed
 
                 default: // in case
@@ -188,130 +187,42 @@ public class Vulpes { // https://letterboxd.com/film/fantastic-mr-fox/
     }
 
     public static class TaskList {
-        if (line.equals("bye")) bye(tasks); // exit
-        else {
-            if (line.equals("list")) { // show all in array
-                System.out.println("Synchronize your clocks. The time is now 9:45 a.m. (beeping) Here, put these bandit hats on.");
-                for (int i = 0; i < tasks.size(); ++i) System.out.println((i + 1) + "." + tasks.get(i).toString());
-            } else { // if not then all other cases that modify the array
-                String[] input = line.split(" "); // chop up the input line
-                String command = input[0];
-                String params = line.replaceFirst(command + "\\s*", "").trim(); // extract params while accounting for them not being around, also handle spacing
-                switch (input[0]) {
-                    case "mark":
-                    case "unmark":
-                    case "delete": // borrow mark and unmark logic of 1 command + 1 param
-                        if (params.isEmpty()) { // check for missing params
-                            throw new Command.VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (mark/unmark command requires a task number! Try again like 'mark/unmark + [index]').");
-                        }
+        private ArrayList<Task> tasks;
 
-                        int testIndex;
+        public TaskList() {
+            this.tasks = new ArrayList<>(); // without save file
+        }
 
-                        try { // check if param is valid
-                            testIndex = Integer.parseInt(params);
-                        } catch (NumberFormatException e) {
-                            throw new Command.VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (the task number requires... well, number... not '" + params + "').");
-                        }
+        public TaskList(ArrayList<Task> tasks) {
+            this.tasks = tasks; // T, D, E
+        }
 
-                        if (testIndex <= 0 || testIndex > tasks.size()) { // check if index is within range - from 1 to current
-                            throw new Command.VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (task " + testIndex + " doesn't exist! There are only " + tasks.size() + " targets in the list at the moment).");
-                        }
+        public void add(Task task) { // adder
+            this.tasks.add(task);
+        }
 
-                        if (input[0].equals("mark")) { // if all checks pass code executes
-                            tasks.get(testIndex - 1).setStatus(true);
-                            System.out.println("It's good for morale. Done.");
-                        } else if (input[0].equals("unmark")) {
-                            tasks.get(testIndex - 1).setStatus(false);
-                            System.out.println("But it's... not done yet.");
-                        } else { // delete
-                            listUpdater(tasks, "", new String[] {params}); // empty priority is deletion flag
-                        }
+        public Task remove(int taskIndex) { // deleter
+            return this.tasks.remove(taskIndex);
+        }
 
-                        if (!input[0].equals("delete")) System.out.println("  " + tasks.get(testIndex - 1).toString()); // if delete, updater handles printing
-                        break;
+        public Task get(int taskIndex) { // finder
+            return this.tasks.get(taskIndex);
+        }
 
-                    case "todo": // take in description only
-                        if (params.isEmpty()) { // check for missing params
-                            throw new Command.VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (todo command requires description! Try again like 'todo [description]').");
-                        }
+        public int size() {
+            return this.tasks.size();
+        }
 
-                        if (line.contains(" /by") || line.contains(" /from") || line.contains(" /to")) { // check for mismatched command-delimiter use
-                            throw new Command.VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (todo command cannot use time or date keywords like /by, /from, or /to! Try again with 'deadline' or 'event'?).");
-                        }
+        public boolean isEmpty() {
+            return this.tasks.isEmpty();
+        }
 
-                        listUpdater(tasks, "T", new String[] {params}); // pass to updater
-                        break;
-
-                    case "deadline": // take in description and end
-                        if (params.isEmpty()) { // check for missing params
-                            throw new Command.VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (deadline command requires description and deadline! Try again like 'deadline [description] /by [time/date]");
-                        }
-
-                        if (line.contains(" /from") || line.contains(" /to")) { // check for mismatched command-delimiter use
-                            throw new Command.VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (deadline command requires /by keyword, and cannot use /from or /to keywords! Try again with 'event'?).");
-                        }
-
-                        if (!line.contains(" /by")) { // check for mismatched command-delimiter use
-                            throw new Command.VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (deadline command requires /by keyword! Try again with 'deadline [description] /by [time/date]').");
-                        }
-
-                        String[] deadlineParts = params.split(" /by ", 2); // if all checks pass code executes; split with " /by " - spaces for clean split
-                        String deadlineDescription = deadlineParts[0];
-                        String deadlineEnd = deadlineParts.length > 1 ? deadlineParts[1] : "";
-
-                        if (deadlineDescription.isEmpty() || deadlineEnd.isEmpty()) { // check description or end time are empty
-                            throw new Command.VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (deadline command requires description and end time! Try again like 'deadline [description] /[end time]').");
-                        }
-
-                        listUpdater(tasks, "D",new String[] {deadlineDescription, deadlineEnd}); // pass to updater
-                        break;
-
-                    case "event":
-                        if (params.isEmpty()) { // check for missing params
-                            throw new Command.VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event command requires description, start time and end time! Try again like 'event [description] /from [start] /to [end]').");
-                        }
-
-                        if (line.contains(" /by")) { // check for mismatched command-delimiter use
-                            throw new Command.VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event command requires /from and /to keywords, and cannot use /by keyword! Try again with 'deadline'?).");
-                        }
-
-                        if (!line.contains(" /from") || !line.contains(" /to")) { // check for mismatched command-delimiter use
-                            throw new Command.VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event command requires /from and /to keywords! Try again like 'event [description] /from [start] /to [end]').");
-                        }
-
-                        String[] eventPartsFrom = params.split(" /from ", 2); // split with "/from" to get description etc
-                        if (eventPartsFrom.length < 2) {
-                            throw new Command.VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event command requires /from keyword! Try again like 'event [description] /from [start] /to [end]').");
-                        }
-
-                        String eventDescription = eventPartsFrom[0].trim();
-                        String rest = eventPartsFrom[1];
-
-                        String[] eventPartsTo = rest.split(" /to ", 2); // split again with  "/to" to get start and end
-                        if (eventPartsTo.length < 2) {
-                            throw new Command.VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event command requires /to keyword! Try again like 'event [description] /from [start] /to [end]').");
-                        }
-
-                        String eventStart = eventPartsTo[0];
-                        String eventEnd = eventPartsTo[1];
-
-                        if (eventDescription.isEmpty() || eventStart.isEmpty() || eventEnd.isEmpty()) { // check for missing params
-                            throw new Command.VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event command requires description, start time and and end time! Try again like 'event [description] /from [start] /to [end]').");
-                        }
-
-                        listUpdater(tasks, "E",new String[] {eventDescription, eventStart, eventEnd}); // pass to updater
-                        break;
-
-                    default:
-                        throw new Command.VulpesException("I don't know what you're talking about, but it sounds illegal (it looks like you aren't issuing a valid command! Try again like 'todo','deadline','event','mark','unmark').");
-                }
-            }
-            ui.showLine();;
-            caller(tasks);
+        public ArrayList<Task> getAllTasks() { // return self
+            return this.tasks;
         }
     }
 
-    public abstract class Command { // to be extended
+    public abstract static class Command { // to be extended
         public abstract void execute(TaskList tasks, Ui ui, Storage storage) throws VulpesException;
 
         public boolean isExit() { // default no
@@ -333,7 +244,7 @@ public class Vulpes { // https://letterboxd.com/film/fantastic-mr-fox/
 
         @Override
         public void execute(TaskList tasks, Ui ui, Storage storage) { // save done by storage instead
-            ui.showMessage("Okay, cuss you. Don't cussing point at me.");
+            ui.showMessage("*whistles, clicks tongue* (Bye!)");
         }
     }
 
@@ -383,7 +294,7 @@ public class Vulpes { // https://letterboxd.com/film/fantastic-mr-fox/
         }
     }
 
-    public class DeleteCommand extends Command {
+    public static class DeleteCommand extends Command {
         private final int taskIndex;
 
         public DeleteCommand(int taskIndex) {
@@ -424,7 +335,7 @@ public class Vulpes { // https://letterboxd.com/film/fantastic-mr-fox/
         }
 
         @Override
-        public void execute(TaskList tasks, Ui ui, Storage storage) {
+        public void execute(TaskList tasks, Ui ui, Storage storage) throws VulpesException {
             Task newTask;
 
             switch (type) { // create right object
@@ -448,67 +359,86 @@ public class Vulpes { // https://letterboxd.com/film/fantastic-mr-fox/
             ui.showMessage("  " + newTask.toString());
             ui.showMessage("Now you have " + tasks.size() + " targets in the list at the moment.");
 
-            // Save changes to the file
-            storage.save(tasks);
+            storage.save(tasks); // save
         }
     }
 
     public static class Storage {
+        private final Path filePath; // manage path
 
-        private static final Path filePath = Paths.get("data", "Vulpes.txt"); // components for cross-platform compatibility
-
-        public static boolean checkFile() {
-            //TODO: corruption handling
-            return Files.exists(filePath);
+        public Storage(String filePath) {
+            this.filePath = Paths.get(filePath);
         }
 
-        private static void readFile(boolean exists) {
-            var tasks = new ArrayList<Task>(); // array updated to arraylist now
-            if (exists) { // if save file exists
-                try (Stream<String> lines = Files.lines(filePath)) { // retrieves all lines from file
-                    lines.forEach(line -> { // format we will use is 'type|status|description|by/from|to|'
-                        String[] taskParts = line.split("\\|");
-                        switch (taskParts[0]) {
-                            case "T":
-                                tasks.add(new Todo(taskParts[1], taskParts[2]));
-                                break;
-                            case "D":
-                                tasks.add(new Deadline(taskParts[1], taskParts[2], taskParts[3]));
-                                break;
-                            case "E":
-                                tasks.add(new Event(taskParts[1], taskParts[2], taskParts[3], taskParts[4]));
-                                break;
-                        }
-                    });
-                } catch (IOException e) {
-                    System.err.println("Error reading the file: " + e.getMessage());
-                }
-            }
-            tryCall(tasks); // first call
-        }
-
-        private static void writeFile(ArrayList<Task> tasks) {
-            List<String> linesToWrite = tasks.stream()
-                    .map(Task::toFileString) // make each task to file format string
-                    .collect(Collectors.toList());
-
+        public TaskList load() throws VulpesException {
+            ArrayList<Task> loadedTasks = new ArrayList<>();
             try {
-
-                Files.createDirectories(filePath.getParent()); // check directory exists before writing
-
-                Files.write(filePath, linesToWrite); // overwrite old Vulpes file
+                if (Files.exists(filePath)) { // if there is save
+                    List<String> lines = Files.readAllLines(filePath); // load all
+                    for (String line : lines) {
+                        if (line.trim().isEmpty()) { // attempt to handle problematic lines
+                            continue;
+                        }
+                        loadedTasks.add(parseLineToTask(line)); // parse line
+                    }
+                } else {
+                    Files.createDirectories(filePath.getParent()); // check directory before save
+                }
             } catch (IOException e) {
-                System.err.println("Error writing to the file: " + e.getMessage());
+                throw new VulpesException("Uh-oh, we got it wrong. " + e.getMessage());
             }
+            return new TaskList(loadedTasks); // pass back tasks
+        }
+
+        public void save(TaskList tasks) throws VulpesException {
+            try {
+                ArrayList<String> linesToWrite = new ArrayList<>(); // temp list
+                for (Task task : tasks.getAllTasks()) {
+                    linesToWrite.add(task.toFileString()); // load up lines
+                }
+                Files.write(this.filePath, linesToWrite); // write
+            } catch (IOException e) {
+                throw new VulpesException("Uh-oh, we got it wrong. " + e.getMessage());
+            }
+        }
+
+        private static Task parseLineToTask(String line) throws VulpesException { // parses 1 line
+            String[] parts = line.split(" \\| "); // type|status|description|by/from|to
+
+            Task task;
+            String taskType = parts[0];
+            boolean isDone = parts[1].equals("1");
+
+            switch (taskType) {
+                case "T":
+                    if (parts.length < 3) throw new VulpesException("Corrupted todo data in file.");
+                    task = new Todo(parts[2]);
+                    break;
+                case "D":
+                    if (parts.length < 4) throw new VulpesException("Corrupted deadline data in file.");
+                    task = new Deadline(parts[2], parts[3]);
+                    break;
+                case "E":
+                    if (parts.length < 5) throw new VulpesException("Corrupted event data in file.");
+                    task = new Event(parts[2], parts[3], parts[4]);
+                    break;
+                default:
+                    throw new VulpesException("Unknown task type '" + taskType + "' found in file. Data may be corrupted.");
+            }
+
+            if (isDone) {
+                task.setStatus(true);
+            }
+            return task;
         }
     }
 
-    public abstract static class Task { // partial solution template; replaces earlier 2-array storage system; made abstract to prevent instantiation; superseded by to-do
+    public abstract static class Task { // made abstract to prevent instantiation
         protected String description; // task body
         protected String priority; // task type
         protected boolean isDone; // mark/unmark flag
 
-        //TODO: enums for priority if time allows
+        //TODO: enums for priority if time allows?
 
         public Task(String description, String priority) {
             this.description = description;
@@ -663,53 +593,8 @@ public class Vulpes { // https://letterboxd.com/film/fantastic-mr-fox/
         }
     }
 
-    public static void listUpdater(ArrayList<Task> tasks, String priority, String [] params) { // announces changes, added is a deletion flag
-        if (!priority.isEmpty()) { // if list received a new item
-            System.out.println("Another target added to the list:");
-            switch (priority) { // add item to list according to type
-                case "T":
-                    tasks.add(new Todo(params[0])); // if its a to-do
-                    break;
-                case "D":
-                    tasks.add(new Deadline(params[0], params[1])); // if its a deadline
-                    break;
-                case "E":
-                    tasks.add(new Event(params[0], params[1], params[2])); // if its an event
-                    break;
-            }
-            System.out.println("  " + tasks.get(tasks.size() - 1).toString()); // print the item in question
-        } else { // if item was deleted from the list
-            System.out.println("Target deleted from the list:");
-            System.out.println("  " + tasks.get(Integer.parseInt(params[0]) - 1).toString()); // print the item in question
-            tasks.remove(Integer.parseInt(params[0]) - 1); // execute delete after printing if it was flagged
-        }
-    }
-
-    public static void tryCall(ArrayList<Task> tasks) { // first call
-        try {
-            caller(tasks); // starts the requests to user
-        } catch (VulpesException e) {
-            System.out.println("Uh-oh, we got it wrong. " + e.getMessage());
-            ui.showLine();;
-            tryCall(tasks);
-        }
-    }
-
-    public static void caller(ArrayList<Task> tasks) throws VulpesException { // next request from user
-        Scanner scanner = new Scanner(System.in);
-        String nextItem = scanner.nextLine();
-        ui.showLine();;
-        Parser(tasks, nextItem);
-    }
-
-    public static void bye(ArrayList<Task> tasks) { // ends session
-        System.out.println("*whistles, clicks tongue* (Bye!)");
-        ui.showLine();;
-        Storage.writeFile(tasks);
-    }
-
     public static void main(String[] args) {
-        run();
+        new Vulpes("data/Vulpes.txt").run();
     }
 }
 
