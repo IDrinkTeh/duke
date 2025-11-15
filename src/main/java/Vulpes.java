@@ -15,10 +15,10 @@ public class Vulpes {
         System.out.println("Canis Lupus? Vulpes vulpes!");
         System.out.println("All right, let's start planning. Who knows shorthand?");
         System.out.println("____________________________________________________________");
-        FileProcessor.readFile(FileProcessor.checkFile());
+        Storage.readFile(Storage.checkFile());
     }
 
-    public static class FileProcessor {
+    public static class Storage {
 
         private static final Path filePath = Paths.get("data", "Vulpes.txt"); // components for cross-platform compatibility
 
@@ -59,7 +59,7 @@ public class Vulpes {
 
             try {
 
-                Files.createDirectories(filePath.getParent()); // check  parent directory exists before writing
+                Files.createDirectories(filePath.getParent()); // check directory exists before writing
 
                 Files.write(filePath, linesToWrite); // overwrite old Vulpes file
             } catch (IOException e) {
@@ -264,7 +264,7 @@ public class Vulpes {
         }
     }
 
-    public static void Processor(ArrayList<Task> tasks, String line) throws VulpesException { // takes in initial input, switches functions based on input; had some help from AI here for ideas for handling errors
+    public static void Parser(ArrayList<Task> tasks, String line) throws VulpesException { // takes in initial input, switches functions based on input; had some help from AI here for ideas for handling errors
         if (line.equals("bye")) bye(tasks); // exit
         else {
             if (line.equals("list")) { // show all in array
@@ -424,13 +424,13 @@ public class Vulpes {
         Scanner scanner = new Scanner(System.in);
         String nextItem = scanner.nextLine();
         System.out.println("____________________________________________________________");
-        Processor(tasks, nextItem);
+        Parser(tasks, nextItem);
     }
 
     public static void bye(ArrayList<Task> tasks) { // ends session
         System.out.println("*whistles, clicks tongue* (Bye!)");
         System.out.println("____________________________________________________________");
-        FileProcessor.writeFile(tasks);
+        Storage.writeFile(tasks);
     }
 
     public static void main(String[] args) {
