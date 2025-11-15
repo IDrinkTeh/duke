@@ -403,7 +403,11 @@ public class Vulpes { // https://letterboxd.com/film/fantastic-mr-fox/
         }
 
         private static Task parseLineToTask(String line) throws VulpesException { // parses 1 line
-            String[] parts = line.split(" \\| "); // type|status|description|by/from|to
+            String[] parts = line.split("\\|"); // type|status|description|by/from|to
+
+            if (parts.length < 3) { // added validation of minimum 3 parts
+                throw new VulpesException("Corrupted data in file. Line is too short: " + line);
+            }
 
             Task task;
             String taskType = parts[0];
@@ -411,15 +415,14 @@ public class Vulpes { // https://letterboxd.com/film/fantastic-mr-fox/
 
             switch (taskType) {
                 case "T":
-                    if (parts.length < 3) throw new VulpesException("Corrupted todo data in file.");
                     task = new Todo(parts[2]);
                     break;
                 case "D":
-                    if (parts.length < 4) throw new VulpesException("Corrupted deadline data in file.");
+                    if (parts.length < 4) throw new VulpesException("Corrupted deadline data in file: " + line);
                     task = new Deadline(parts[2], parts[3]);
                     break;
                 case "E":
-                    if (parts.length < 5) throw new VulpesException("Corrupted event data in file.");
+                    if (parts.length < 5) throw new VulpesException("Corrupted event data in file: " + line);
                     task = new Event(parts[2], parts[3], parts[4]);
                     break;
                 default:
