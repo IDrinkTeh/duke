@@ -14,6 +14,7 @@ public class Vulpes {
         System.out.println("____________________________________________________________");
         System.out.println("Canis Lupus? Vulpes vulpes!");
         System.out.println("All right, let's start planning. Who knows shorthand?");
+        System.out.println("____________________________________________________________");
         FileProcessor.readFile(FileProcessor.checkFile());
     }
 
@@ -34,11 +35,14 @@ public class Vulpes {
                         String[] taskParts = line.split("\\|");
                         switch (taskParts[0]) {
                             case "T":
-                                tasks.add(new Todo(taskParts[1]));
+                                tasks.add(new Todo(taskParts[1], taskParts[2]));
+                                break;
                             case "D":
-                                tasks.add(new Deadline(taskParts[1], taskParts[2]));
+                                tasks.add(new Deadline(taskParts[1], taskParts[2], taskParts[3]));
+                                break;
                             case "E":
-                                tasks.add(new Event(taskParts[1], taskParts[2], taskParts[3]));
+                                tasks.add(new Event(taskParts[1], taskParts[2], taskParts[3], taskParts[4]));
+                                break;
                         }
                     });
                 } catch (IOException e) {
@@ -77,6 +81,7 @@ public class Vulpes {
      }
      */
 
+    /*
     public static void echo() { // echo echo echo...
         System.out.println("What'd the doctor say?");
         System.out.println("____________________________________________________________");
@@ -88,6 +93,7 @@ public class Vulpes {
         }
         bye();
     }
+    */
 
     public abstract static class Task { // partial solution template; replaces earlier 2-array storage system; made abstract to prevent instantiation; superseded by to-do
         protected String description; // task body
@@ -122,6 +128,10 @@ public class Vulpes {
             return "";
         } // suggested by AI to streamline printing and respect OOP
 
+        public String toFileString() {
+            return "";
+        }
+
         public void setStatus(boolean status) {
             this.isDone = status;
         }
@@ -154,6 +164,17 @@ public class Vulpes {
             super.priority = "T";
         }
 
+        public Todo(String status, String description) {
+            super.description = description;
+            super.isDone = status.equals("1");
+            super.priority = "T";
+        }
+
+        @Override
+        public String toFileString() { // type|status|description
+            return "T|" + (super.isDone ? "1" : "0") + "|" + getDescription();
+        }
+
         @Override
         public String toString() {return "[T][" + super.getStatusIcon() + "] " + super.getDescription();} // suggested by AI to streamline printing and respect OOP
     }
@@ -164,6 +185,18 @@ public class Vulpes {
             super.isDone = false;
             super.priority = "D";
             this.end = end;
+        }
+
+        public Deadline(String status, String description, String end) {
+            super.description = description;
+            super.isDone = status.equals("1");
+            super.priority = "D";
+            this.end = end;
+        }
+
+        @Override
+        public String toFileString() { // type|status|description|by
+            return "D|" + (super.isDone ? "1" : "0") + "|" + getDescription() + "|" + this.end;
         }
 
         @Override
@@ -187,6 +220,19 @@ public class Vulpes {
             super.priority = "E";
             this.start = start;
             this.end = end;
+        }
+
+        public Event(String status, String description, String start, String end) {
+            super.description = description;
+            super.isDone = status.equals("1");
+            super.priority = "E";
+            this.start = start;
+            this.end = end;
+        }
+
+        @Override
+        public String toFileString() { // type|status|description|start|end
+            return "E|" + (super.isDone ? "1" : "0") + "|" + getDescription() + "|" + this.start + "|" + this.end;
         }
 
         @Override
@@ -219,7 +265,7 @@ public class Vulpes {
     }
 
     public static void Processor(ArrayList<Task> tasks, String line) throws VulpesException { // takes in initial input, switches functions based on input; had some help from AI here for ideas for handling errors
-        if (line.equals("bye")) bye(); // exit
+        if (line.equals("bye")) bye(tasks); // exit
         else {
             if (line.equals("list")) { // show all in array
                 System.out.println("Synchronize your clocks. The time is now 9:45 a.m. (beeping) Here, put these bandit hats on.");
@@ -381,9 +427,10 @@ public class Vulpes {
         Processor(tasks, nextItem);
     }
 
-    public static void bye() { // ends session
+    public static void bye(ArrayList<Task> tasks) { // ends session
         System.out.println("*whistles, clicks tongue* (Bye!)");
         System.out.println("____________________________________________________________");
+        FileProcessor.writeFile(tasks);
     }
 
     public static void main(String[] args) {
