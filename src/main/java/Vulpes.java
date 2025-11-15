@@ -26,10 +26,10 @@ public class Vulpes {
         System.out.println("____________________________________________________________");
         Scanner scanner = new Scanner(System.in);
         String echo = scanner.nextLine();
-            while (!echo.equals("bye")) {
-                System.out.println(echo);
-                echo = scanner.nextLine();
-            }
+        while (!echo.equals("bye")) {
+            System.out.println(echo);
+            echo = scanner.nextLine();
+        }
         bye();
     }
 
@@ -151,45 +151,132 @@ public class Vulpes {
         }
     }
 
-    public static void Processor(Task[] stored, String line, int index) { // takes in initial input, switches functions based on input
-        if (line.equals("bye")) bye(); // exit
-        else {
-            if (line.equals("list")) { // show all in array
-                System.out.println("Synchronize your clocks. The time is now 9:45 a.m. (beeping) Here, put these bandit hats on.");
-                for (int i = 0; i < index; i++) System.out.println((i + 1) + "." + stored[i].toString());
-            } else { // if not then all other cases that modify the array
-                String[] input = line.split(" "); // chop up the input line
-                switch (input[0]) {
-                    case "mark": // limit function to "mark [position]" only
-                        stored[Integer.parseInt(input[1]) - 1].setStatus(true); // mark as complete
-                        System.out.println("It's good for morale. Done.");
-                        System.out.println("  " + stored[Integer.parseInt(input[1]) - 1].toString());
-                        break;
-                    case "unmark": // limit function to "unmark [position]" only
-                        stored[Integer.parseInt(input[1]) - 1].setStatus(false); // mark as incomplete
-                        System.out.println("But it's... not done yet.");
-                        System.out.println("  " + stored[Integer.parseInt(input[1]) - 1].toString());
-                        break;
-                    case "todo": // take in description only
-                        line = line.replace("todo ", "");
-                        stored[index] = new Todo(line); // Instantiate the object first
-                        index = added(stored, index);
-                        break;
-                    case "deadline": // take in description and end
-                        input = line.replace("deadline ", "").split(" /");
-                        stored[index] = new Deadline(input[0], input[1]);
-                        index = added(stored, index);
-                        break;
-                    case "event": // take in description, start and end
-                        input = line.replace("event ", "").split(" /");
-                        stored[index] = new Event(input[0], input[1], input[2]);
-                        index = added(stored, index);
-                        break;
-                }
-            }
-            System.out.println("____________________________________________________________");
-            caller(stored, index);
+    public static class VulpesException extends Exception { // make use of existing exceptions
+        public VulpesException(String message) {
+            super(message);
         }
+    }
+
+    public static void Processor(Task[] stored, String line, int index) throws VulpesException { // takes in initial input, switches functions based on input; had some help from AI here for ideas for handling errors
+        if (line.equals("bye")) bye(); // exit
+        else if (line.equals("list")) { // show all in array
+            System.out.println("Synchronize your clocks. The time is now 9:45 a.m. (beeping) Here, put these bandit hats on.");
+            for (int i = 0; i < index; i++) System.out.println((i + 1) + "." + stored[i].toString());
+        } else { // if not then all other cases that modify the array
+            String[] input = line.split(" "); // chop up the input line
+            switch (input[0]) {
+                case "mark":
+                case "unmark":
+                    if (input.length < 2) { // check if there is param after command
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (mark/unmark command needs a task number! Try again like 'mark/unmark + [index]').");
+                    }
+
+                    int testIndex;
+                    try { // check if param is valid
+                        testIndex = Integer.parseInt(input[1]);
+                    } catch (NumberFormatException e) {
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (the task number must be a... well, number... not '" + input[1] + "').");
+                    }
+
+                    if (testIndex <= 0 || testIndex > index) { // check if index is within range - from 1 to current
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (task " + testIndex + " doesn't exist! There are only " + index + " targets in the list at the moment).");
+                    }
+
+                    if (input[0].equals("mark")) { // if all checks pass code executes
+                        stored[testIndex - 1].setStatus(true);
+                        System.out.println("It's good for morale. Done.");
+                    } else {
+                        stored[testIndex - 1].setStatus(false);
+                        System.out.println("But it's... not done yet.");
+                    }
+                    System.out.println("  " + stored[testIndex - 1].toString());
+                    break;
+                case "todo": // take in description only
+                    if (line.trim().equals("todo")) { // check if no description
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (todo command requires a description! Try again like 'todo [description]').");
+                    }
+
+                    String todoContent = line.replace("todo ", "");
+
+                    if (todoContent.contains(" /by") || todoContent.contains(" /from") || todoContent.contains(" /to")) { // check for mismatched command-delimiter use
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (todo command cannot use time or date keywords like /by, /from, or /to! Try again with 'deadline' or 'event'?).");
+                    }
+
+                    line = line.replace("todo ", ""); // if all checks pass code executes
+                    stored[index] = new Todo(line);
+                    index = added(stored, index);
+                    break;
+                case "deadline": // take in description and end
+                    if (line.trim().equals("deadline")) { // check for missing params
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (deadline command requires a description and deadline! Try again like 'deadline [description] /by [time/date]");
+                    }
+
+                    String deadlineContent = line.replace("deadline ", "");
+
+
+                    if (deadlineContent.contains(" /from") || deadlineContent.contains(" /to")) { // check for mismatched command-delimiter use
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (deadline command requires /by keyword, and cannot use /from or /to keywords! Try again with 'event'?).");
+                    }
+
+                    if (!deadlineContent.contains(" /by")) { // check for mismatched command-delimiter use
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (deadline command requires /by keyword! Try again with 'deadline [description] /by [time/date]').");
+                    }
+
+                    String[] deadlineParts = deadlineContent.split(" /by ", 2); // if all checks pass code executes; split with " /by " - spaces for clean split
+                    String deadlineDescription = deadlineParts[0].trim();
+                    String deadlineEnd = deadlineParts.length > 1 ? deadlineParts[1].trim() : "";
+
+                    if (deadlineDescription.isEmpty() || deadlineEnd.isEmpty()) { // check description or end time are empty
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (deadline command requires description and end time! Try again like 'deadline [description] /[end time]').");
+                    }
+
+                    stored[index] = new Deadline(deadlineDescription, deadlineEnd); // if all checks pass code executes
+                    index = added(stored, index);
+                    break;
+                case "event":
+                    if (line.trim().equals("event")) { // check for missing params
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event command requires description, start time and end time! Try again like 'event [description] /from [start] /to [end]').");
+                    }
+
+                    String eventContent = line.replace("event ", "");
+
+                    if (eventContent.contains(" /by")) { // check for mismatched command-delimiter use
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event command requires /from and /to keywords, and cannot use /by keyword! Try again with 'deadline'?).");
+                    }
+
+                    if (!eventContent.contains(" /from") || !eventContent.contains(" /to")) { // check for mismatched command-delimiter use
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event command requires /from and /to keywords! Try again like 'event [description] /from [start] /to [end]').");
+                    }
+
+                    String[] eventPartsFrom = eventContent.split(" /from ", 2); // split with "/from" to get description etc
+                    if (eventPartsFrom.length < 2) { // check for mismatched command-delimiter use
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event command requires /from keyword! Try again like 'event [description] /from [start] /to [end]').");
+                    }
+
+                    String eventDescription = eventPartsFrom[0].trim();
+                    String rest = eventPartsFrom[1];
+
+                    String[] eventPartsTo = rest.split(" /to ", 2); // split again with  "/to" to get start and end
+                    if (eventPartsTo.length < 2) { // check for mismatched command-delimiter use
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event command requires /to keyword! Try again like 'event [description] /from [start] /to [end]').");
+                    }
+
+                    String eventStart = eventPartsTo[0].trim();
+                    String eventEnd = eventPartsTo[1].trim();
+
+                    if (eventDescription.isEmpty() || eventStart.isEmpty() || eventEnd.isEmpty()) { // check for missing params
+                        throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (event command requires description, start time and and end time! Try again like 'event [description] /from [start] /to [end]').");
+                    }
+
+                    stored[index] = new Event(eventDescription, eventStart, eventEnd);
+                    index = added(stored, index);
+                    break;
+                default:
+                    throw new VulpesException("I don't know what you're talking about, but it sounds illegal (it looks like you aren't issuing a valid command! Try again like 'todo','deadline','event','mark','unmark').");
+            }
+        }
+        System.out.println("____________________________________________________________");
+        caller(stored, index);
     }
 
     public static int added(Task[] stored, int index) { // array storage of items
@@ -200,15 +287,20 @@ public class Vulpes {
         return ++index;
     }
 
-    public static void store() { // array storage of items
+    public static void store() { // array storage of items; had some help from AI here for ideas for handling errors
         System.out.println("All right, let's start planning. Who knows shorthand?");
         System.out.println("____________________________________________________________");
         Task[] stored = new Task[100]; // only 1 array needed now
         int index = 0;
-        caller(stored, index); // starts the requests to user
+        try {
+            caller(stored, index); // starts the requests to user
+        } catch (VulpesException e) {
+            System.out.println("Uh-oh, we got it wrong. " + e.getMessage());
+            store();
+        }
     }
 
-    public static void caller(Task[] stored, int index) { // next request from user
+    public static void caller(Task[] stored, int index) throws VulpesException { // next request from user
         Scanner scanner = new Scanner(System.in);
         String nextItem = scanner.nextLine();
         System.out.println("____________________________________________________________");
