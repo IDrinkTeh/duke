@@ -9,19 +9,45 @@ import vulpes.task.Todo;
 import vulpes.tasklist.TaskList;
 import vulpes.ui.Ui;
 
+import java.time.*;
+
 public class AddCommand extends Command {
     private final Command.TaskType type;
     private final String description;
-    private final String by;   // For Deadline
-    private final String from; // For Event
-    private final String to;   // For Event
+    private final LocalDateTime by;   // For Deadline
+    private final LocalDateTime from; // For Event
+    private final LocalDateTime to;   // For Event
 
-    public AddCommand(Command.TaskType type, String description, String by, String from, String to) { // full params for all 3, most is with events
+    public AddCommand(TaskType type, String description, LocalDateTime by, LocalDateTime from, LocalDateTime to) { // full params for all 3, most is with events
         this.type = type;
         this.description = description;
         this.by = by;
         this.from = from;
         this.to = to;
+    }
+
+    public AddCommand(TaskType type, String description, LocalDateTime by) { // full params for all 3, most is with events
+        this.type = type;
+        this.description = description;
+        this.by = by;
+        this.from = null;
+        this.to = null;
+    }
+
+    public AddCommand(TaskType type, String description, LocalDateTime from, LocalDateTime to) { // full params for all 3, most is with events
+        this.type = type;
+        this.description = description;
+        this.by = null;
+        this.from = from;
+        this.to = to;
+    }
+
+    public AddCommand(TaskType type, String description) {
+        this.type = type;
+        this.description = description;
+        this.by = null;
+        this.from = null;
+        this.to = null;
     }
 
     @Override

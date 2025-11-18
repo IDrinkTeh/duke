@@ -1,13 +1,11 @@
 package vulpes.storage;
 
 import vulpes.exception.VulpesException;
-import vulpes.storage.Storage;
 import vulpes.task.Deadline;
 import vulpes.task.Event;
 import vulpes.task.Task;
 import vulpes.task.Todo;
 import vulpes.tasklist.TaskList;
-import vulpes.ui.Ui;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDateTime;
 
 public class Storage {
     private final Path filePath; // manage path
@@ -72,11 +71,11 @@ public class Storage {
                 break;
             case "D":
                 if (parts.length < 4) throw new VulpesException("Corrupted deadline data in file: " + line);
-                task = new Deadline(parts[2], parts[3]);
+                task = new Deadline(parts[2], LocalDateTime.parse(parts[3]));
                 break;
             case "E":
                 if (parts.length < 5) throw new VulpesException("Corrupted event data in file: " + line);
-                task = new Event(parts[2], parts[3], parts[4]);
+                task = new Event(parts[2], LocalDateTime.parse(parts[3]), LocalDateTime.parse(parts[4]));
                 break;
             default:
                 throw new VulpesException("Unknown task type '" + taskType + "' found in file. Data may be corrupted.");

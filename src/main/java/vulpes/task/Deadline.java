@@ -1,35 +1,42 @@
 package vulpes.task;
 
+import java.time.LocalDateTime;
+import java.time.format.*;
+
 public class Deadline extends Task { // Deadlines: tasks that need to be done before a specific date/time e.g., submit report by 11/10/2019 5pm
-    public Deadline(String description, String end) {
+    public Deadline(String description, LocalDateTime by) {
         super.description = description;
         super.isDone = false;
         super.priority = "D";
-        this.end = end;
+        this.by = by;
     }
 
-    public Deadline(String status, String description, String end) {
+    public Deadline(String status, String description, LocalDateTime by) {
         super.description = description;
         super.isDone = status.equals("1");
         super.priority = "D";
-        this.end = end;
+        this.by = by;
     }
+
+    // https://www.baeldung.com/java-datetimeformatter
+    String dateTimeFormat = "dd.MM.yyyy hh:mm a";
+    DateTimeFormatter newFormatter = DateTimeFormatter.ofPattern(dateTimeFormat);
 
     @Override
     public String toFileString() { // type|status|description|by
-        return "D|" + (super.isDone ? "1" : "0") + "|" + getDescription() + "|" + this.end;
+        return "D|" + (super.isDone ? "1" : "0") + "|" + getDescription() + "|" + newFormatter.format(this.getBy());
     }
 
     @Override
-    public String toString() {return "[D][" + super.getStatusIcon() + "] " + super.getDescription() + " (by: " + this.getEnd() + ")";} // suggested by AI to streamline printing and respect OOP
+    public String toString() {return "[D][" + super.getStatusIcon() + "] " + super.getDescription() + " (by: " + newFormatter.format(this.getBy()) + ")";} // print in different format
 
-    protected String end;
+    protected LocalDateTime by;
 
-    public void setEnd (String datetime){
-        this.end = datetime;
+    public void setBy(LocalDateTime datetime){
+        this.by = datetime;
     }
 
-    public String getEnd () {
-        return this.end;
+    public LocalDateTime getBy() {
+        return this.by;
     }
 }
