@@ -15,13 +15,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDateTime;
 
+/**
+ * Class used to store and retrieve the list from user's local directory
+ */
 public class Storage {
-    private final Path filePath; // manage path
+    /**
+     * Manages the path
+     */
+    private final Path filePath;
 
+    /**
+     * Constructor that takes in only path
+     * @param filePath The file path at which the list will be saved/loaded from the user's local directory
+     */
     public Storage(String filePath) {
         this.filePath = Paths.get(filePath);
     }
 
+    /**
+     * Method to check if storage file exists on user's local directory and loads from there
+     * creates a file if it does not already exist
+     * @return List of tasks loaded from the file - could be none.
+     * @throws IOException if read or write fails
+     */
     public TaskList load() throws VulpesException {
         ArrayList<Task> loadedTasks = new ArrayList<>();
         try {
@@ -42,6 +58,12 @@ public class Storage {
         return new TaskList(loadedTasks); // pass back tasks
     }
 
+    /**
+     * Method to write to storage file on user's local directory
+     * overwrites existing file
+     * @param tasks List of tasks to write to file
+     * @throws IOException if read or write fails
+     */
     public void save(TaskList tasks) throws VulpesException {
         try {
             ArrayList<String> linesToWrite = new ArrayList<>(); // temp list
@@ -54,7 +76,16 @@ public class Storage {
         }
     }
 
-    private static Task parseLineToTask(String line) throws VulpesException { // parses 1 line
+    /**
+     * Method segments the lines found
+     * parses line by line to create new task
+     * checks if line is corrupted
+     * returns task to loader
+     * @param line Line to parse for loading into list
+     * @return Singular parsed task for loading into list
+     * @throws VulpesException if data is not formatted the way it was expected to be
+     */
+    private static Task parseLineToTask(String line) throws VulpesException {
         String[] parts = line.split("\\|"); // type|status|description|by/from|to
 
         if (parts.length < 3) { // added validation of minimum 3 parts

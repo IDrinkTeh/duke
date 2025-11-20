@@ -7,11 +7,19 @@ import vulpes.command.DeleteCommand;
 import vulpes.command.ExitCommand;
 import vulpes.command.ListCommand;
 import vulpes.command.StatusCommand;
+
 import java.time.*;
 import java.time.LocalDateTime;
 
+/**
+ * Class that parses input from the user and decides execution depending on user input
+ */
 public class Parser {
-
+    /**
+     * Method that parses input from user and decides which command to execute
+     * @param fullCommand Whole line from user to parse
+     * @throws VulpesException if any part of line is not issued in format expected
+     */
     public static Command parse(String fullCommand) throws VulpesException { // parses full command string, only interprets and packages; supersedes the prior processor
         String[] parts = fullCommand.trim().split(" ", 2);
         String command = parts[0].toLowerCase();
@@ -41,6 +49,13 @@ public class Parser {
         }
     }
 
+    /**
+     * Method that handles addition of new task to list
+     * Includes checks and handlers to ensure data is valid for execution
+     * @param command Indicates which of the 3 possible tasks were selected for addition
+     * @param params Required parameters for proper execution of specified command
+     * @throws VulpesException if any part of line is not issued in format expected
+     */
     private static AddCommand parseAdd(String command, String params) throws VulpesException { // handlers moved
         if (params.isEmpty()) {
             throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (" + command + "' requires more details!).");
@@ -76,8 +91,6 @@ public class Parser {
                 // only accept in certain format, todo: flesh out datetime, not in interest of time at the moment
 
                 deadlineBy = deadlineBy.trim();
-
-
 
                 if (deadlineBy.length() == 5) { // time only
                     try {
@@ -175,6 +188,12 @@ public class Parser {
         }
     }
 
+    /**
+     * Method that handles deletion of existing task from list
+     * Includes checks and handlers to ensure data is valid for execution
+     * @param params Required parameters for proper execution of specified command
+     * @throws VulpesException if any part of line is not issued in format expected
+     */
     private static DeleteCommand parseDelete(String params) throws VulpesException { // handlers moved
         if (params.isEmpty()) {
             throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (delete command requires a task number!).");
@@ -187,6 +206,13 @@ public class Parser {
         }
     }
 
+    /**
+     * Method that handles deletion of existing task from list
+     * Includes checks and handlers to ensure data is valid for execution
+     * @param command Indicates whether selected task is to be marked or unmarked
+     * @param params Required parameters for proper execution of specified command
+     * @throws VulpesException if any part of line is not issued in format expected
+     */
     private static StatusCommand parseStatus(String command, String params) throws VulpesException { // handlers moved
         if (params.isEmpty()) {
             throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (" + command + " command requires a task number!).");

@@ -11,37 +11,29 @@ import vulpes.ui.Ui;
 
 import java.time.*;
 
+/**
+ * Extension of abstract base class used to add tasks to the list
+ */
 public class AddCommand extends Command {
+
     private final Command.TaskType type;
     private final String description;
-    private final LocalDateTime by;   // For Deadline
-    private final LocalDateTime from; // For Event
-    private final LocalDateTime to;   // For Event
+    /**
+     * For Deadline
+     */
+    private final LocalDateTime by;
+    /**
+     * For Event
+     */
+    private final LocalDateTime from;
+    /**
+     * For Event
+     */
+    private final LocalDateTime to;
 
-    public AddCommand(TaskType type, String description, LocalDateTime by, LocalDateTime from, LocalDateTime to) { // full params for all 3, most is with events
-        this.type = type;
-        this.description = description;
-        this.by = by;
-        this.from = from;
-        this.to = to;
-    }
-
-    public AddCommand(TaskType type, String description, LocalDateTime by) { // full params for all 3, most is with events
-        this.type = type;
-        this.description = description;
-        this.by = by;
-        this.from = null;
-        this.to = null;
-    }
-
-    public AddCommand(TaskType type, String description, LocalDateTime from, LocalDateTime to) { // full params for all 3, most is with events
-        this.type = type;
-        this.description = description;
-        this.by = null;
-        this.from = from;
-        this.to = to;
-    }
-
+    /**
+     * Constructor for To-do, no by, from, to
+     */
     public AddCommand(TaskType type, String description) {
         this.type = type;
         this.description = description;
@@ -50,6 +42,34 @@ public class AddCommand extends Command {
         this.to = null;
     }
 
+    /**
+     * Constructor for Deadline, no from and to
+     */
+    public AddCommand(TaskType type, String description, LocalDateTime by) {
+        this.type = type;
+        this.description = description;
+        this.by = by;
+        this.from = null;
+        this.to = null;
+    }
+
+    /**
+     * Constructor for Events, no by
+     */
+    public AddCommand(TaskType type, String description, LocalDateTime from, LocalDateTime to) {
+        this.type = type;
+        this.description = description;
+        this.by = null;
+        this.from = from;
+        this.to = to;
+    }
+
+    /**
+     * Overrides execution in the abstract base class
+     * Specifies which task type to create
+     * Produces feedback for user
+     * Calls storage to save once task added to list
+     */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws VulpesException {
         Task newTask;
@@ -75,6 +95,6 @@ public class AddCommand extends Command {
         ui.showMessage("  " + newTask.toString());
         ui.showMessage("Now you have " + tasks.size() + " targets in the list at the moment.");
 
-        storage.save(tasks); // save
+        storage.save(tasks);
     }
 }

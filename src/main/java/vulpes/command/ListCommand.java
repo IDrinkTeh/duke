@@ -1,15 +1,22 @@
 package vulpes.command;
 
-import vulpes.exception.VulpesException;
 import vulpes.storage.Storage;
-import vulpes.task.Deadline;
-import vulpes.task.Event;
-import vulpes.task.Task;
-import vulpes.task.Todo;
 import vulpes.tasklist.TaskList;
 import vulpes.ui.Ui;
 
+/**
+ * Extension of abstract base class used to show the list and the tasks therein
+ */
 public class ListCommand extends Command { // to list
+    /**
+     * Overrides execution in the abstract base class
+     * Produces flavour for user
+     * Flavour changes depending on number of tasks in the list
+     * Iterates through list and prints every task
+     * @param tasks Instance of TaskList class
+     * @param ui Instance of UI class
+     * @param storage Instance of Storage class
+     */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
         ui.showMessage("Synchronize your clocks. The time is now 9:45 a.m. Here, put these bandit hats on.");

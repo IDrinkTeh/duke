@@ -1,22 +1,30 @@
 package vulpes.command;
 
-import vulpes.exception.VulpesException;
 import vulpes.storage.Storage;
-import vulpes.task.Deadline;
-import vulpes.task.Event;
-import vulpes.task.Task;
-import vulpes.task.Todo;
 import vulpes.tasklist.TaskList;
 import vulpes.ui.Ui;
 
-public class ExitCommand extends Command { // to exit
+/**
+ * Extension of abstract base class used to exit the app
+ */
+public class ExitCommand extends Command {
+    /**
+     * Overrides default exit flag to indicate exiting
+     */
     @Override
     public boolean isExit() { // now true to exit
         return true;
     }
 
+    /**
+     * Overrides execution in the abstract base class
+     * Produces feedback for user
+     * @param tasks Instance of TaskList class
+     * @param ui Instance of UI class
+     * @param storage Instance of Storage class
+     */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) { // save done by storage instead
+    public void execute(TaskList tasks, Ui ui, Storage storage) {
         ui.showMessage("*whistles, clicks tongue* (Bye!)");
     }
 }
