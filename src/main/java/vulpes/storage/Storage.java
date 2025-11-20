@@ -14,6 +14,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
  * Class used to store and retrieve the list from user's local directory
@@ -85,6 +87,9 @@ public class Storage {
      * @return Singular parsed task for loading into list
      * @throws VulpesException if data is not formatted the way it was expected to be
      */
+
+    private static final DateTimeFormatter newFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy hh:mm a");
+
     private static Task parseLineToTask(String line) throws VulpesException {
         String[] parts = line.split("\\|"); // type|status|description|by/from|to
 
@@ -96,20 +101,26 @@ public class Storage {
         String taskType = parts[0];
         boolean isDone = parts[1].equals("1");
 
-        switch (taskType) {
-            case "T":
-                task = new Todo(parts[2]);
-                break;
-            case "D":
-                if (parts.length < 4) throw new VulpesException("Corrupted deadline data in file: " + line);
-                task = new Deadline(parts[2], LocalDateTime.parse(parts[3]));
-                break;
-            case "E":
-                if (parts.length < 5) throw new VulpesException("Corrupted event data in file: " + line);
-                task = new Event(parts[2], LocalDateTime.parse(parts[3]), LocalDateTime.parse(parts[4]));
-                break;
-            default:
-                throw new VulpesException("Unknown task type '" + taskType + "' found in file. Data may be corrupted.");
+        try { // wrap to catch unexpected errors
+            switch (taskType) {
+                case "T":
+                    task = new Todo(parts[2]);
+                    break;
+                case "D":
+                    if (parts.length < 4) throw new VulpesException("Corrupted deadline data in file: " + line);
+                    task = new Deadline(parts[2], LocalDateTime.parse(parts[3]));
+                    break;
+                case "E":
+                    if (parts.length < 5) throw new VulpesException("Corrupted event data in file: " + line);
+                    LocalDateTime from = LocalDateTime.parse(parts[3], newFormatter); // added to address DateTimeParseException
+                    LocalDateTime to = LocalDateTime.parse(parts[4], newFormatter); // added to address DateTimeParseException
+                    task = new Event(parts[2], from, to);
+                    break;
+                default:
+                    throw new VulpesException("Unknown task type '" + taskType + "' found in file. Data may be corrupted.");
+            }
+        } catch (DateTimeParseException e) {
+            throw new VulpesException("Could not parse date, please check format. Error in line: " + line);
         }
 
         if (isDone) {
