@@ -1,3 +1,5 @@
+package vulpes;
+
 import vulpes.command.Command;
 import vulpes.exception.VulpesException;
 import vulpes.parser.Parser;

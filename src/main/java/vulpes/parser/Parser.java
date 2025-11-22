@@ -1,12 +1,7 @@
 package vulpes.parser;
 
+import vulpes.command.*;
 import vulpes.exception.VulpesException;
-import vulpes.command.Command;
-import vulpes.command.AddCommand;
-import vulpes.command.DeleteCommand;
-import vulpes.command.ExitCommand;
-import vulpes.command.ListCommand;
-import vulpes.command.StatusCommand;
 
 import java.time.*;
 import java.time.LocalDateTime;
@@ -32,7 +27,13 @@ public class Parser {
             case "list":
                 return new ListCommand();
 
+            case "archive":
+                return new ArchiveCommand();
+
             case "delete":
+                return parseDelete(params);
+
+            case "transfer":
                 return parseDelete(params);
 
             case "mark":
