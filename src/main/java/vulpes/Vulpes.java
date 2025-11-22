@@ -64,6 +64,6 @@ public class Vulpes {
      * Main function now pulls from two paths - list and archived
      */
     public static void main(String[] args) {
-        new Vulpes("data/Vulpes.txt", "data/Archived.txt").run();
+        new Vulpes("data/Vulpes.txt", "data/Archives.txt").run();
     }
 }

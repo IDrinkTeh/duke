@@ -47,6 +47,6 @@ public class DeleteCommand extends Command {
         ui.showMessage("  " + removedTask.toString());
         ui.showMessage("Now you have " + tasks.size("") + " tasks in the list.");
 
-        storage.save("", tasks);
+        storage.save("", tasks.getAllTasks(""));
     }
 }

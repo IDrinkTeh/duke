@@ -2,6 +2,7 @@ package vulpes.parser;
 
 import vulpes.exception.VulpesException;
 import vulpes.command.Command;
+import vulpes.command.ArchiveCommand;
 import vulpes.command.ArchivesCommand;
 import vulpes.command.AddCommand;
 import vulpes.command.DeleteCommand;
@@ -35,6 +36,10 @@ public class Parser {
 
             case "archives":
                 return new ArchivesCommand();
+
+            case "archive":
+            case "unarchive":
+                return parseArchive(command, params);
 
             case "delete":
                 return parseDelete(params);
@@ -226,7 +231,27 @@ public class Parser {
             boolean isDone = command.equals("mark");
             return new StatusCommand(taskIndex, isDone);
         } catch (NumberFormatException e) {
-            throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (the task number requires... well, a number... not '" + params + "').");
+            throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (the task number requires... well, a singular number... not '" + params + "').");
+        }
+    }
+
+    /**
+     * Method that handles movement of task to and from archives
+     * Includes checks and handlers to ensure data is valid for execution
+     * @param command Indicates whether selected task is to be archived or unarchived
+     * @param params Required parameters for proper execution of specified command
+     * @throws VulpesException if any part of line is not issued in format expected
+     */
+    private static ArchiveCommand parseArchive(String command, String params) throws VulpesException { // handlers moved
+        if (params.isEmpty()) {
+            throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (" + command + " command requires a task number!).");
+        }
+        try {
+            int taskIndex = Integer.parseInt(params);
+            boolean isDone = command.equals("archive");
+            return new ArchiveCommand(taskIndex, isDone);
+        } catch (NumberFormatException e) {
+            throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (the task number requires... well, a singular number... not '" + params + "').");
         }
     }
 }

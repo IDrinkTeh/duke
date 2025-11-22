@@ -7,6 +7,7 @@ import vulpes.task.Task;
 import vulpes.task.Todo;
 import vulpes.tasklist.TaskList;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -85,13 +86,13 @@ public class Storage {
      * @param list A list being written
      * @throws IOException if read or write fails
      */
-    public void save(String list, TaskList tasks) throws VulpesException {
+    public void save(String list, ArrayList<Task> tasks) throws VulpesException {
         try {
             ArrayList<String> linesToWrite = new ArrayList<>(); // temp list
-            for (Task task : tasks.getAllTasks(list)) {
+            for (Task task : tasks) {
                 linesToWrite.add(task.toFileString()); // load up lines
             }
-            if (list.equals("arc")) Files.write(archivesPath, linesToWrite); // write
+            if (list.equals("archives")) Files.write(archivesPath, linesToWrite); // write
             else Files.write(listPath, linesToWrite);
         } catch (IOException e) {
             throw new VulpesException("Uh-oh, we got it wrong. " + e.getMessage());

@@ -57,6 +57,6 @@ public class StatusCommand extends Command {
         }
         ui.showMessage("  " + taskToUpdate.toString());
 
-        storage.save("", tasks);
+        storage.save("", tasks.getAllTasks(""));
     }
 }

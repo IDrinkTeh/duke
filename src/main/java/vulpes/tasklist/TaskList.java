@@ -39,7 +39,7 @@ public class TaskList {
      * @param task A task to add to a list
      */
     public void add(String list, Task task) { // adder
-        if (list.equals("arc")) this.archivedTasks.add(task);
+        if (list.equals("archives")) this.archivedTasks.add(task);
         else this.listTasks.add(task);
     }
 
@@ -49,7 +49,7 @@ public class TaskList {
      * @param taskIndex A task to remove from the list
      */
     public Task remove(String list, int taskIndex) { // deleter
-        if (list.equals("arc")) return this.archivedTasks.remove(taskIndex);
+        if (list.equals("archives")) return this.archivedTasks.remove(taskIndex);
         return this.listTasks.remove(taskIndex);
     }
 
@@ -59,7 +59,7 @@ public class TaskList {
      * @param taskIndex A task to return from the list
      */
     public Task get(String list, int taskIndex) { // finder
-        if (list.equals("arc")) return this.archivedTasks.get(taskIndex);
+        if (list.equals("archives")) return this.archivedTasks.get(taskIndex);
         return this.listTasks.get(taskIndex);
     }
 
@@ -68,7 +68,7 @@ public class TaskList {
      * @param list A list to size up
      */
     public int size(String list) {
-        if (list.equals("arc")) return this.archivedTasks.size();
+        if (list.equals("archives")) return this.archivedTasks.size();
         return this.listTasks.size();
     }
 
@@ -77,7 +77,7 @@ public class TaskList {
      * @param list A list to check whether there are tasks in
      */
     public boolean isEmpty(String list) {
-        if (list.equals("arc")) return this.archivedTasks.isEmpty();
+        if (list.equals("archives")) return this.archivedTasks.isEmpty();
         return this.listTasks.isEmpty();
     }
 
@@ -85,7 +85,7 @@ public class TaskList {
      * Method that returns pair of list and archives
      */
     public ArrayList<Task> getAllTasks(String list) { // return self
-        if (list.equals("arc")) return this.archivedTasks;
+        if (list.equals("archives")) return this.archivedTasks;
         return this.listTasks;
     }
 }

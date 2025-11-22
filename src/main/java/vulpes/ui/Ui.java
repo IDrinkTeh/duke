@@ -1,5 +1,7 @@
 package vulpes.ui;
 
+import vulpes.command.ListCommand;
+
 import java.util.Scanner;
 
 /**

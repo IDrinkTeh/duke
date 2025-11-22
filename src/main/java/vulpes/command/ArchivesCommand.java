@@ -21,11 +21,11 @@ public class ArchivesCommand extends Command { // to list
     public void execute(TaskList archivedTasks, Ui ui, Storage archives) {
         ui.showMessage("You know what? I'm going to just put dirt in my ears. Yeah. That's better. I can't hear you now.");
 
-        if (archivedTasks.isEmpty("")) {
+        if (archivedTasks.isEmpty("archives")) {
             ui.showMessage("The archives are empty. There are no targets at the moment.");
         } else {
-            for (int i = 0; i < archivedTasks.size(""); i++) { // accounted for index
-                ui.showMessage((i + 1) + "." + archivedTasks.get("", i).toString()); // print every line
+            for (int i = 0; i < archivedTasks.size("archives"); i++) { // accounted for index
+                ui.showMessage((i + 1) + "." + archivedTasks.get("archives", i).toString()); // print every line
             }
         }
     }

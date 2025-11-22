@@ -95,6 +95,6 @@ public class AddCommand extends Command {
         ui.showMessage("  " + newTask.toString());
         ui.showMessage("Now you have " + tasks.size("") + " targets in the list at the moment.");
 
-        storage.save("", tasks);
+        storage.save("", tasks.getAllTasks(""));
     }
 }
