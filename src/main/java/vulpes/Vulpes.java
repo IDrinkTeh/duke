@@ -26,13 +26,13 @@ public class Vulpes {
     /**
      * Definition of classes specified in 'run' method
      * @param listPath The file path at which the list will be saved/loaded from the user's local directory
-     * @param archivedPath The file path at which the archives will be saved/loaded from the user's local directory
+     * @param archivesPath The file path at which the archives will be saved/loaded from the user's local directory
      */
-    public Vulpes(String listPath, String archivedPath) {
+    public Vulpes(String listPath, String archivesPath) {
         ui = new Ui();
-        storage = new Storage(listPath, archivedPath);
+        storage = new Storage(listPath, archivesPath);
         try {
-            storage = new TaskList(storage.load(Path.of(listPath), Path.of(archivedPath)).getAllTasks());
+            tasks = storage.load(Path.of(listPath), Path.of(archivesPath));
         } catch (VulpesException e) {
             ui.showError("...");
             tasks = new TaskList(); // start with empty list

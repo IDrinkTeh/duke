@@ -1,8 +1,6 @@
 package vulpes.tasklist;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import vulpes.task.Task;
 
@@ -22,10 +20,14 @@ public class TaskList {
     }
 
     /**
-     * Constructor that stores list
-     * @param listTasks List of tasks to complete
-     * @param archivedTasks List of tasks that were shelved
+     * Constructor that holds list and archives
+     * @param tasks Pair ot list and archives
      */
+    public TaskList(ArrayList<ArrayList<Task>> tasks) {
+        this.listTasks = tasks.get(0);
+        this.archivedTasks = tasks.get(1);
+    }
+
     public TaskList(ArrayList<Task> listTasks, ArrayList<Task> archivedTasks) {
         this.listTasks = listTasks;
         this.archivedTasks = archivedTasks;
@@ -33,52 +35,57 @@ public class TaskList {
 
     /**
      * Method that adds tasks to the list
-     * @param task A task to add to the list
+     * @param list A list to add a task to
+     * @param task A task to add to a list
      */
-    public void add(Task task) { // adder
-        this.listTasks.add(task);
+    public void add(String list, Task task) { // adder
+        if (list.equals("arc")) this.archivedTasks.add(task);
+        else this.listTasks.add(task);
     }
 
     /**
      * Method that remove tasks from the list
-     * @param tasks A list to remove a task from
+     * @param list A list to remove a task from
      * @param taskIndex A task to remove from the list
      */
-    public Task remove(ArrayList<Task> tasks, int taskIndex) { // deleter
-        return tasks.remove(taskIndex);
+    public Task remove(String list, int taskIndex) { // deleter
+        if (list.equals("arc")) return this.archivedTasks.remove(taskIndex);
+        return this.listTasks.remove(taskIndex);
     }
 
     /**
      * Method that returns a task from the list
-     * @param tasks A list to return a task from
+     * @param list A list to return a task from
      * @param taskIndex A task to return from the list
      */
-    public Task get(ArrayList<Task> tasks, int taskIndex) { // finder
-        return tasks.get(taskIndex);
+    public Task get(String list, int taskIndex) { // finder
+        if (list.equals("arc")) return this.archivedTasks.get(taskIndex);
+        return this.listTasks.get(taskIndex);
     }
 
     /**
      * Method that returns size of the list
-     * @param tasks A list to size up
+     * @param list A list to size up
      */
-    public int size(ArrayList<Task> tasks) {
-        return tasks.size();
+    public int size(String list) {
+        if (list.equals("arc")) return this.archivedTasks.size();
+        return this.listTasks.size();
     }
 
     /**
      * Method that checks whether there are tasks in the list
-     * @param tasks A list to check whether there are tasks in
+     * @param list A list to check whether there are tasks in
      */
-    public boolean isEmpty(ArrayList<Task> tasks) {
-        return tasks.isEmpty();
+    public boolean isEmpty(String list) {
+        if (list.equals("arc")) return this.archivedTasks.isEmpty();
+        return this.listTasks.isEmpty();
     }
 
     /**
-     * Method that returns full list
-     * @param path Selects whether list or archives are returned
+     * Method that returns pair of list and archives
      */
-    public ArrayList<Task> getAllTasks(Path path) { // return self
-        if (path.toString().equals("data/Vulpes.txt")) return listTasks;
-        return archivedTasks;
+    public ArrayList<Task> getAllTasks(String list) { // return self
+        if (list.equals("arc")) return this.archivedTasks;
+        return this.listTasks;
     }
 }

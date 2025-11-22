@@ -2,7 +2,7 @@ package vulpes.parser;
 
 import vulpes.exception.VulpesException;
 import vulpes.command.Command;
-import vulpes.command.ArchiveCommand;
+import vulpes.command.ArchivesCommand;
 import vulpes.command.AddCommand;
 import vulpes.command.DeleteCommand;
 import vulpes.command.ExitCommand;
@@ -34,7 +34,7 @@ public class Parser {
                 return new ListCommand();
 
             case "archives":
-                return new ArchiveCommand();
+                return new ArchivesCommand();
 
             case "delete":
                 return parseDelete(params);

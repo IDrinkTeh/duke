@@ -41,13 +41,13 @@ public class StatusCommand extends Command {
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws VulpesException {
-        if (taskIndex <= 0 || taskIndex > tasks.size()) {
+        if (taskIndex <= 0 || taskIndex > tasks.size("")) {
             throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (task "
                     + taskIndex + " doesn't exist! There are only "
-                    + tasks.size() + " targets in the list at the moment).");
+                    + tasks.size("") + " targets in the list at the moment).");
         }
 
-        Task taskToUpdate = tasks.get(taskIndex - 1); // accounted for index
+        Task taskToUpdate = tasks.get("", taskIndex - 1); // accounted for index
         taskToUpdate.setStatus(status);
 
         if (status) {
@@ -57,6 +57,6 @@ public class StatusCommand extends Command {
         }
         ui.showMessage("  " + taskToUpdate.toString());
 
-        storage.save(tasks);
+        storage.save("", tasks);
     }
 }

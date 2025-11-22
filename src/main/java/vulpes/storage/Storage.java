@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import java.time.LocalDateTime;
+import java.time.format.*;
 
 /**
  * Class used to store and retrieve any list from user's local directory
@@ -24,8 +25,8 @@ public class Storage {
     /**
      * Manages the path
      */
-    private final Path list;
-    private final Path archived;
+    private final Path listPath;
+    private final Path archivesPath;
 
     /**
      * Constructor that takes in only path
@@ -33,8 +34,8 @@ public class Storage {
      * @param archivedPath The file path at which archives will be saved/loaded from the user's local directory
      */
     public Storage(String listPath, String archivedPath) {
-        this.list = Paths.get(listPath);
-        this.archived = Paths.get(archivedPath);
+        this.listPath = Paths.get(listPath);
+        this.archivesPath = Paths.get(archivedPath);
     }
 
     /**
@@ -81,16 +82,17 @@ public class Storage {
      * Method to write to storage file on user's local directory
      * overwrites existing file
      * @param tasks A list of tasks to write to file
-     * @param path The path to write to
+     * @param list A list being written
      * @throws IOException if read or write fails
      */
-    public void save(TaskList tasks, Path path) throws VulpesException {
+    public void save(String list, TaskList tasks) throws VulpesException {
         try {
             ArrayList<String> linesToWrite = new ArrayList<>(); // temp list
-            for (Task task : tasks.getAllTasks(path)) {
+            for (Task task : tasks.getAllTasks(list)) {
                 linesToWrite.add(task.toFileString()); // load up lines
             }
-            Files.write(path, linesToWrite); // write
+            if (list.equals("arc")) Files.write(archivesPath, linesToWrite); // write
+            else Files.write(listPath, linesToWrite);
         } catch (IOException e) {
             throw new VulpesException("Uh-oh, we got it wrong. " + e.getMessage());
         }

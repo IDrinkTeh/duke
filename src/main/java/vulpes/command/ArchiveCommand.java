@@ -1,32 +1,52 @@
 package vulpes.command;
 
+import vulpes.exception.VulpesException;
 import vulpes.storage.Storage;
+import vulpes.task.Task;
 import vulpes.tasklist.TaskList;
 import vulpes.ui.Ui;
 
 /**
- * Extension of abstract base class used to show the archives and the tasks therein
+ * Extension of abstract base class used to delete tasks from the list
  */
-public class ArchiveCommand extends Command { // to list
+public class ArchiveCommand extends Command {
+    /**
+     * Indicates index of task to delete
+     */
+    private final int taskIndex;
+
+    /**
+     * Standard contractor that only takes in index of task in list
+     * @param taskIndex Index of the task selected from list to be deleted
+     */
+    public ArchiveCommand(int taskIndex) {
+        this.taskIndex = taskIndex;
+    }
+
     /**
      * Overrides execution in the abstract base class
-     * Produces flavour for user
-     * Flavour changes depending on number of tasks in the archives
-     * Iterates through archives and prints every task
-     * @param archivedTasks Instance of TaskList class for archives
+     * Checks for whether index selected for deletion is valid
+     * Deletes task and produces feedback for user
+     * Calls storage to save once task deleted from list
+     * @param tasks Instance of TaskList class
      * @param ui Instance of UI class
-     * @param archived Instance of Storage class for archives
+     * @param storage Instance of Storage class
+     * @throws VulpesException if task to delete does not exist
      */
     @Override
-    public void execute(TaskList archivedTasks, Ui ui, Storage archived) {
-        ui.showMessage("You know what? I'm going to just put dirt in my ears. Yeah. That's better. I can't hear you now.");
-
-        if (archivedTasks.isEmpty()) {
-            ui.showMessage("The archives are empty. There are no targets at the moment.");
-        } else {
-            for (int i = 0; i < archivedTasks.size(); i++) { // accounted for index
-                ui.showMessage((i + 1) + "." + archivedTasks.get(i).toString()); // print every line
-            }
+    public void execute(TaskList tasks, Ui ui, Storage storage) throws VulpesException {
+        if (taskIndex <= 0 || taskIndex > tasks.size("")) {
+            throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (task "
+                    + taskIndex + " doesn't exist! There are only "
+                    + tasks.size("") + " targets in the list at the moment).");
         }
+
+        Task removedTask = tasks.remove("", taskIndex - 1); // accounted for index
+
+        ui.showMessage("Noted. I've removed this task from the list:");
+        ui.showMessage("  " + removedTask.toString());
+        ui.showMessage("Now you have " + tasks.size("") + " tasks in the list.");
+
+        storage.save("", tasks);
     }
 }

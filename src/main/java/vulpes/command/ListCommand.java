@@ -21,11 +21,11 @@ public class ListCommand extends Command { // to list
     public void execute(TaskList listTasks, Ui ui, Storage list) {
         ui.showMessage("Synchronize your clocks. The time is now 9:45 a.m. Here, put these bandit hats on.");
 
-        if (listTasks.isEmpty()) {
+        if (listTasks.isEmpty("")) {
             ui.showMessage("The list is empty. There are no targets at the moment.");
         } else {
-            for (int i = 0; i < listTasks.size(); i++) { // accounted for index
-                ui.showMessage((i + 1) + "." + listTasks.get(i).toString()); // print every line
+            for (int i = 0; i < listTasks.size(""); i++) { // accounted for index
+                ui.showMessage((i + 1) + "." + listTasks.get("", i).toString()); // print every line
             }
         }
     }

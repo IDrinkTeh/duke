@@ -89,12 +89,12 @@ public class AddCommand extends Command {
                 return;
         }
 
-        tasks.add(newTask);
+        tasks.add("", newTask);
 
         ui.showMessage("Another target added to the list:");
         ui.showMessage("  " + newTask.toString());
-        ui.showMessage("Now you have " + tasks.size() + " targets in the list at the moment.");
+        ui.showMessage("Now you have " + tasks.size("") + " targets in the list at the moment.");
 
-        storage.save(tasks);
+        storage.save("", tasks);
     }
 }

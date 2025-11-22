@@ -35,18 +35,18 @@ public class DeleteCommand extends Command {
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws VulpesException {
-        if (taskIndex <= 0 || taskIndex > tasks.size()) {
+        if (taskIndex <= 0 || taskIndex > tasks.size("")) {
             throw new VulpesException("I'm sorry. Maybe my invitation got lost in the mail... (task "
                     + taskIndex + " doesn't exist! There are only "
-                    + tasks.size() + " targets in the list at the moment).");
+                    + tasks.size("") + " targets in the list at the moment).");
         }
 
-        Task removedTask = tasks.remove(taskIndex - 1); // accounted for index
+        Task removedTask = tasks.remove("", taskIndex - 1); // accounted for index
 
         ui.showMessage("Noted. I've removed this task from the list:");
         ui.showMessage("  " + removedTask.toString());
-        ui.showMessage("Now you have " + tasks.size() + " tasks in the list.");
+        ui.showMessage("Now you have " + tasks.size("") + " tasks in the list.");
 
-        storage.save(tasks);
+        storage.save("", tasks);
     }
 }
