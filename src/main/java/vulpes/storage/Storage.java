@@ -7,6 +7,7 @@ import vulpes.task.Task;
 import vulpes.task.Todo;
 import vulpes.tasklist.TaskList;
 
+import java.util.HashMap;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,55 +25,73 @@ public class Storage {
     /**
      * Manages the path
      */
-    private final Path path;
+    private final Path list;
+    private final Path archived;
 
     /**
      * Constructor that takes in only path
-     * @param path The file path at which a list will be saved/loaded from the user's local directory
+     * @param listPath The file path at which a list will be saved/loaded from the user's local directory
+     * @param archivedPath The file path at which archives will be saved/loaded from the user's local directory
      */
-    public Storage(String path) {
-        this.path = Paths.get(path);
+    public Storage(String listPath, String archivedPath) {
+        this.list = Paths.get(listPath);
+        this.archived = Paths.get(archivedPath);
     }
 
     /**
      * Method to check if storage file exists on user's local directory and loads from there
      * creates a file if it does not already exist
+     * @param listPath The file path at which a list will be saved/loaded from the user's local directory
+     * @param archivedPath The file path at which archives will be saved/loaded from the user's local directory
      * @return A list of tasks loaded from the file - could be none.
      * @throws IOException if read or write fails
      */
-    public TaskList load(java.nio.file.Path path) throws VulpesException { // TaskList usage
-        ArrayList<Task> loadedTasks = new ArrayList<>();
-        try {
-            if (Files.exists(path)) { // if there is save
-                List<String> lines = Files.readAllLines(path); // load all
-                for (String line : lines) {
-                    if (line.trim().isEmpty()) { // attempt to handle problematic lines
-                        continue;
+    public TaskList load(Path listPath, Path archivedPath) throws VulpesException { // TaskList usage
+        HashMap<Path, ArrayList<Task>> collection = new HashMap<>(); // https://www.w3schools.com/java/java_hashmap.asp
+        collection.put(listPath ,new ArrayList<Task>());
+        collection.put(archivedPath ,new ArrayList<Task>());
+        collection.forEach(
+                (path, tasks) -> { https://www.w3schools.com/java/ref_hashmap_foreach.asp
+                    try {
+                        if (Files.exists(path)) { // if there is save
+                            List<String> lines = Files.readAllLines(path); // load all
+                            for (String line : lines) {
+                                if (line.trim().isEmpty()) { // attempt to handle problematic lines
+                                    continue;
+                                }
+                                tasks.add(parseLineToTask(line)); // parse line
+                            }
+                        } else {
+                            Files.createDirectories(path.getParent()); // check directory before save
+                        }
+                    } catch (IOException e) { // these are bullshit and have to be fixed
+                        try {
+                            throw new VulpesException("Uh-oh, we got it wrong. " + e.getMessage());
+                        } catch (VulpesException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    } catch (VulpesException e) {
+                        throw new RuntimeException(e);
                     }
-                    loadedTasks.add(parseLineToTask(line)); // parse line
                 }
-            } else {
-                Files.createDirectories(path.getParent()); // check directory before save
-            }
-        } catch (IOException e) {
-            throw new VulpesException("Uh-oh, we got it wrong. " + e.getMessage());
-        }
-        return new TaskList(loadedTasks); // pass back tasks
+        );
+        return new TaskList(collection.get(listPath), collection.get(archivedPath)); // pass back tasks
     }
 
     /**
      * Method to write to storage file on user's local directory
      * overwrites existing file
      * @param tasks A list of tasks to write to file
+     * @param path The path to write to
      * @throws IOException if read or write fails
      */
-    public void save(TaskList tasks) throws VulpesException {
+    public void save(TaskList tasks, Path path) throws VulpesException {
         try {
             ArrayList<String> linesToWrite = new ArrayList<>(); // temp list
-            for (Task task : tasks.getAllTasks()) {
+            for (Task task : tasks.getAllTasks(path)) {
                 linesToWrite.add(task.toFileString()); // load up lines
             }
-            Files.write(this.path, linesToWrite); // write
+            Files.write(path, linesToWrite); // write
         } catch (IOException e) {
             throw new VulpesException("Uh-oh, we got it wrong. " + e.getMessage());
         }
