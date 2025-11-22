@@ -18,33 +18,33 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 /**
- * Class used to store and retrieve the list from user's local directory
+ * Class used to store and retrieve any list from user's local directory
  */
 public class Storage {
     /**
      * Manages the path
      */
-    private final Path filePath;
+    private final Path path;
 
     /**
      * Constructor that takes in only path
-     * @param filePath The file path at which the list will be saved/loaded from the user's local directory
+     * @param path The file path at which a list will be saved/loaded from the user's local directory
      */
-    public Storage(String filePath) {
-        this.filePath = Paths.get(filePath);
+    public Storage(String path) {
+        this.path = Paths.get(path);
     }
 
     /**
      * Method to check if storage file exists on user's local directory and loads from there
      * creates a file if it does not already exist
-     * @return List of tasks loaded from the file - could be none.
+     * @return A list of tasks loaded from the file - could be none.
      * @throws IOException if read or write fails
      */
-    public TaskList load() throws VulpesException {
+    public TaskList load(java.nio.file.Path path) throws VulpesException { // TaskList usage
         ArrayList<Task> loadedTasks = new ArrayList<>();
         try {
-            if (Files.exists(filePath)) { // if there is save
-                List<String> lines = Files.readAllLines(filePath); // load all
+            if (Files.exists(path)) { // if there is save
+                List<String> lines = Files.readAllLines(path); // load all
                 for (String line : lines) {
                     if (line.trim().isEmpty()) { // attempt to handle problematic lines
                         continue;
@@ -52,7 +52,7 @@ public class Storage {
                     loadedTasks.add(parseLineToTask(line)); // parse line
                 }
             } else {
-                Files.createDirectories(filePath.getParent()); // check directory before save
+                Files.createDirectories(path.getParent()); // check directory before save
             }
         } catch (IOException e) {
             throw new VulpesException("Uh-oh, we got it wrong. " + e.getMessage());
@@ -63,7 +63,7 @@ public class Storage {
     /**
      * Method to write to storage file on user's local directory
      * overwrites existing file
-     * @param tasks List of tasks to write to file
+     * @param tasks A list of tasks to write to file
      * @throws IOException if read or write fails
      */
     public void save(TaskList tasks) throws VulpesException {
@@ -72,11 +72,16 @@ public class Storage {
             for (Task task : tasks.getAllTasks()) {
                 linesToWrite.add(task.toFileString()); // load up lines
             }
-            Files.write(this.filePath, linesToWrite); // write
+            Files.write(this.path, linesToWrite); // write
         } catch (IOException e) {
             throw new VulpesException("Uh-oh, we got it wrong. " + e.getMessage());
         }
     }
+
+    /**
+     * Formatter to ensure proper writing and reading
+     */
+    private static final DateTimeFormatter newFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy hh:mm a");
 
     /**
      * Method segments the lines found
@@ -87,9 +92,6 @@ public class Storage {
      * @return Singular parsed task for loading into list
      * @throws VulpesException if data is not formatted the way it was expected to be
      */
-
-    private static final DateTimeFormatter newFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy hh:mm a");
-
     private static Task parseLineToTask(String line) throws VulpesException {
         String[] parts = line.split("\\|"); // type|status|description|by/from|to
 
