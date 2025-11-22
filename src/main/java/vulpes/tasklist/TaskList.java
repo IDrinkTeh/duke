@@ -14,7 +14,7 @@ public class TaskList {
     private ArrayList<Task> archivedTasks;
 
     /**
-     * Constructor to make new list without params or contents
+     * Constructor to make new list with params
      */
     public TaskList() {
         this.listTasks = new ArrayList<>(); // without save file

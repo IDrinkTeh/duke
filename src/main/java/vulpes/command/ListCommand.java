@@ -13,19 +13,19 @@ public class ListCommand extends Command { // to list
      * Produces flavour for user
      * Flavour changes depending on number of tasks in the list
      * Iterates through list and prints every task
-     * @param listTasks Instance of TaskList class for list
+     * @param tasks Instance of TaskList class
      * @param ui Instance of UI class
-     * @param list Instance of Storage class for list
+     * @param storage Instance of Storage class
      */
     @Override
-    public void execute(TaskList listTasks, Ui ui, Storage list) {
+    public void execute(TaskList tasks, Ui ui, Storage storage) {
         ui.showMessage("Synchronize your clocks. The time is now 9:45 a.m. Here, put these bandit hats on.");
 
-        if (listTasks.isEmpty()) {
+        if (tasks.isEmpty()) {
             ui.showMessage("The list is empty. There are no targets at the moment.");
         } else {
-            for (int i = 0; i < listTasks.size(); i++) { // accounted for index
-                ui.showMessage((i + 1) + "." + listTasks.get(i).toString()); // print every line
+            for (int i = 0; i < tasks.size(); i++) { // accounted for index
+                ui.showMessage((i + 1) + "." + tasks.get(i).toString()); // print every line
             }
         }
     }
