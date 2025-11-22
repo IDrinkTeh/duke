@@ -20,11 +20,10 @@ public class ArchiveCommand extends Command {
     private final boolean status; // true for archiving, false for unarchiving
 
     /**
-     * Standard contractor that only takes in index of task in list
+     * Constructor takes in index of list and whether task is to be archived or unarchived
      * @param taskIndex Index of the task selected from list to be deleted
      * @param status Indicates whether task is to be archived or not
      */
-
     public ArchiveCommand(int taskIndex, boolean status) {
         this.taskIndex = taskIndex;
         this.status = status;

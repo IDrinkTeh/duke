@@ -16,7 +16,7 @@ public class DeleteCommand extends Command {
     private final int taskIndex;
 
     /**
-     * Standard contractor that only takes in index of task in list
+     * Constructor that only takes in index of task in list
      * @param taskIndex Index of the task selected from list to be deleted
      */
     public DeleteCommand(int taskIndex) {
