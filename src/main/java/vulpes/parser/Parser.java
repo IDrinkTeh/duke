@@ -17,6 +17,8 @@ public class Parser {
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
     private static final DateTimeFormatter DATETIME_FORMAT_DASH = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
     private static final DateTimeFormatter DATETIME_FORMAT_DOT = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy");
+    private static final DateTimeFormatter DATE_FORMAT_DASH = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    private static final DateTimeFormatter DATE_FORMAT_DOT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     /**
      * Method that parses input from user and decides which command to execute
@@ -36,6 +38,9 @@ public class Parser {
 
         case "list":
             return new ListCommand();
+
+        case "view":
+            return parseView(params);
 
         case "find":
             return new FindCommand(params);
@@ -79,16 +84,18 @@ public class Parser {
         // parse as full date and time first (dash format)
         try {
             return LocalDateTime.parse(dateTimeString, DATETIME_FORMAT_DASH);
-        } catch (DateTimeParseException e) { /* Fall through to the next format */ }
+        } catch (DateTimeParseException e) {
+        } // fallthrough to next format
 
         // try dot format
         try {
             return LocalDateTime.parse(dateTimeString, DATETIME_FORMAT_DOT);
-        } catch (DateTimeParseException e) { /* Fall through to the next format */ }
+        } catch (DateTimeParseException e) {
+        } // fallthrough to next format
 
-        // Finally, try to parse as time-only. Throws exception if this also fails.
+        // try to parse as time-only as last case
         LocalTime time = LocalTime.parse(dateTimeString, TIME_FORMAT);
-        return LocalDate.now().atTime(time); // Defaults to today's date
+        return LocalDate.now().atTime(time); // default as today's date
     }
 
     /**
@@ -96,7 +103,7 @@ public class Parser {
      * Includes checks and handlers to ensure data is valid for execution
      *
      * @param command Indicates which of the 3 possible tasks were selected for addition
-     * @param params Required parameters for proper execution of specified command
+     * @param params  Required parameters for proper execution of specified command
      * @throws VulpesException if any part of line is not issued in format expected
      */
     private static AddCommand parseAdd(String command, String params) throws VulpesException { // had some AI tuneups
@@ -110,14 +117,18 @@ public class Parser {
 
         switch (command) {
         case "todo":
-            if (params.contains(" /by") || params.contains(" /from") || params.contains(" /to")) {
-                throw new InvalidDatetimeFormatException("todo cannot use time keywords like /by, /from, or /to!");
+            if (params.contains("/by") || params.contains("/from") || params.contains("/to")) {
+                throw new InvalidDatetimeFormatException("To-do cannot use time keywords like /by, /from, or /to!");
             }
             return new AddCommand(Command.TaskType.TODO, params); // create if checks passed
 
         case "deadline":
-            if (!params.contains(" /by ")) {
-                throw new InvalidDatetimeFormatException("todo cannot use time keywords like /by, /from, or /to!");
+            if (params.contains("/from") || params.contains("/to")) {
+                throw new InvalidDatetimeFormatException("Deadline cannot use keywords /from and/or /to!");
+            }
+
+            if (!params.contains("/by ")) {
+                throw new InvalidDatetimeFormatException("Deadline requires /by keyword!");
             }
             String[] parts = params.split(" /by ", 2); // lump the time and date into one index in the array, if both time and date exists
             String description = parts[0].trim();
@@ -140,7 +151,7 @@ public class Parser {
                 }
                 return new AddCommand(Command.TaskType.DEADLINE, description, by); // create if checks passed
             } catch (DateTimeParseException e) {
-                throw new InvalidDatetimeFormatException("deadline requires '/by' keyword!");
+                throw new InvalidParametersException("deadline");
             }
 
         case "event":
@@ -172,7 +183,7 @@ public class Parser {
                 }
                 return new AddCommand(Command.TaskType.EVENT, description, from, to); // create if checks passed
             } catch (DateTimeParseException e) {
-                throw new InvalidDatetimeFormatException("formatting is quite off..."); // General format error
+                throw new InvalidParametersException("event");
             }
         default:
             throw new CriticalException(); // Should be unreachable
@@ -203,7 +214,7 @@ public class Parser {
      * Includes checks and handlers to ensure data is valid for execution
      *
      * @param command Indicates whether selected task is to be marked or unmarked
-     * @param params Required parameters for proper execution of specified command
+     * @param params  Required parameters for proper execution of specified command
      * @throws VulpesException if any part of line is not issued in format expected
      */
     private static StatusCommand parseStatus(String command, String params) throws VulpesException { // handlers moved
@@ -224,7 +235,7 @@ public class Parser {
      * Includes checks and handlers to ensure data is valid for execution
      *
      * @param command Indicates whether selected task is to be archived or unarchived
-     * @param params Required parameters for proper execution of specified command
+     * @param params  Required parameters for proper execution of specified command
      * @throws VulpesException if any part of line is not issued in format expected
      */
     private static ArchiveCommand parseArchive(String command, String params) throws VulpesException { // handlers moved
@@ -239,4 +250,26 @@ public class Parser {
             throw new InvalidParametersException("archive/unarchive"); // specific exception for command that has invalid params
         }
     }
+
+    /**
+     * Method that handles search of date from list and archives
+     * Includes checks and handlers to ensure data is valid for execution
+     *
+     * @param params  Required parameters for proper execution of specified command
+     * @throws InvalidDateException if any part of line is not issued in format expected
+     */
+    private static ViewCommand parseView(String params) throws InvalidDateException {
+        try {
+            LocalDate criteria = LocalDate.parse(params, DATE_FORMAT_DOT);
+            return new ViewCommand(criteria); // create if checks passed
+        } catch (DateTimeParseException e) {
+        } // fallthrough to next format
+        try {
+            LocalDate criteria = LocalDate.parse(params, DATE_FORMAT_DASH);
+            return new ViewCommand(criteria); // create if checks passed
+        } catch (DateTimeParseException e) {
+            throw new InvalidDateException();
+        }
+    }
+
 }

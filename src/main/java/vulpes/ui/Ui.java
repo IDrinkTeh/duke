@@ -130,6 +130,12 @@ public class Ui {
                     [description] : the criteria for the search
                     *** the more specific you get, the lower the odds of finding what you seek ***
                 
+                'view [date]'
+                    eg. 'view 23.11.2025'
+                    allows you to VIEW all tasks in the app that fit DATE
+                    [date] : the criteria for the search
+                    *** do not input time or else it will fail ***
+                
                 'help'
                     HELP
                     this is how you got to this page :3"""

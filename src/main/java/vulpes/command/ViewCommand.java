@@ -1,50 +1,50 @@
 package vulpes.command;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import vulpes.storage.Storage;
+import vulpes.task.Deadline;
+import vulpes.task.Event;
 import vulpes.task.Task;
 import vulpes.tasklist.TaskList;
 import vulpes.ui.Ui;
 
-import java.util.ArrayList;
-
 /**
- * Extension of abstract base class used to show specific tasks in the list depending on criteriaString
+ * Extension of abstract base class used to show tasks that fall within a certain date
  */
-public class FindCommand extends Command {
-    private final String criteriaString; // string of search criteria to look for
+public class ViewCommand extends Command { // similar to find
+    private final LocalDate criteriaDate; // date criteria to look for
     private final ArrayList<Task> listFound = new ArrayList<>(); // subarray of list tasks found
     private final ArrayList<Task> archivesFound = new ArrayList<>(); // subarray of archives tasks found
+    boolean isValid = false; // flag for whether target found is valid according to criteria
 
     /**
      * Constructor that only takes in search criteriaString
      *
      * @param params The parameters that will be used as search criteriaString
-     * */
-    public FindCommand(String params) {
-        this.criteriaString = params.trim(); // trim to improve match accuracy ; other better SEO practices omitted due to time constraints
+     *
+     */
+    public ViewCommand(LocalDate params) {
+        this.criteriaDate = params; // take in date in localdatetime format
     }
 
     /**
      * Overrides execution in the abstract base class
      * Produces flavour for user
      * Flavour changes depending on number of tasks in the list
-     * Iterates through list and prints every task that corresponds to criteri
+     * Iterates through list and prints every task that corresponds to criteria
      *
-     * @param tasks Instance of the Tasklist class
-     * @param ui Instance of the UI class
+     * @param tasks   Instance of the Tasklist class
+     * @param ui      Instance of the UI class
      * @param storage Instance of the Storage class
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
         for (Task task : tasks.getAllTasks("")) { // for all tasks in the list
-            if (task.getDescription().contains(criteriaString)) {
-                listFound.add(task); // search through list for criteriaString and append to subarray
-            }
+            matcher("", task); // run it through internal helper
         }
         for (Task task : tasks.getAllTasks("archives")) { // for all tasks in the archives
-            if (task.getDescription().contains(criteriaString)) {
-                archivesFound.add(task); // search through archives for criteriaString and append to subarray
-            }
+            matcher("archives", task); // run it through internal helper
         }
 
         ui.showMessage("I'm going to find him, and I'm going to bring him back."); // flavour
@@ -70,6 +70,35 @@ public class FindCommand extends Command {
             ui.showMessage(archivesFound.size() + " found in the archives:");
             for (int i = 0; i < archivesFound.size(); i++) { // accounted for index
                 ui.showMessage((i + 1) + "." + archivesFound.get(i).toString()); // print every line found
+            }
+        }
+    }
+
+    /**
+     * Helper method that does the actual matching
+     * more complex logic than find command
+     *
+     * @param subarray The subarray to which the task might be added
+     * @param task The task to be evaluated against criteria
+     */
+    public void matcher (String subarray,Task task){
+        if (task.getClass().equals(Event.class)) { // if task is an event
+            LocalDate fromDate = ((Event) task).getFrom().toLocalDate();
+            LocalDate toDate = ((Event) task).getTo().toLocalDate();
+            if (fromDate.equals(criteriaDate) || toDate.equals(criteriaDate)) { // if task is an event AND from and/or to falls within criteria
+                isValid = true; // flag for listing
+            }
+        } else if (task.getClass().equals(Deadline.class)) { // if task is a deadline
+            LocalDate eventDate = ((Deadline) task).getBy().toLocalDate();
+            if (eventDate.equals(criteriaDate)) { // if task is a deadline AND by falls within criteria
+                isValid = true; // flag for listing
+            }
+        } // if task is a to-do or doesn't have a date that falls within criteria, flag remains false
+        if (isValid) {
+            if (subarray.equals("archives")) {
+                archivesFound.add(task);
+            } else {
+                listFound.add(task);
             }
         }
     }
