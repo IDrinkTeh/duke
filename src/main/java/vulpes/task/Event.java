@@ -58,7 +58,7 @@ public class Event extends Task { // Events: tasks that start at MissingParamete
     /**
      * Method to set protected variable
      */
-    public void setStart(LocalDateTime datetime) {
+    public void setStart(LocalDateTime datetime) { // might be used for future feature
         this.start = datetime;
     }
 
@@ -72,7 +72,7 @@ public class Event extends Task { // Events: tasks that start at MissingParamete
     /**
      * Method to set protected variable
      */
-    public void setEnd(LocalDateTime datetime) {
+    public void setEnd(LocalDateTime datetime) { // might be used for future feature
         this.end = datetime;
     }
 
