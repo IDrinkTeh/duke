@@ -1,37 +1,33 @@
 package vulpes.parser;
 
-import vulpes.command.AddCommand;
-import vulpes.command.ArchiveCommand;
-import vulpes.command.ArchivesCommand;
-import vulpes.command.Command;
-import vulpes.command.DeleteCommand;
-import vulpes.command.ExitCommand;
-import vulpes.command.FindCommand;
-import vulpes.command.ListCommand;
-import vulpes.command.StatusCommand;
-import vulpes.exception.CriticalException;
-import vulpes.exception.InvalidCommandException;
-import vulpes.exception.InvalidDatetimeException;
-import vulpes.exception.InvalidDatetimeFormatException;
-import vulpes.exception.InvalidParametersException;
-import vulpes.exception.VulpesException;
+import vulpes.command.*;
+import vulpes.exception.*;
 
-import java.time.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
  * Class that parses input from the user and decides execution depending on user input
  */
 public class Parser {
+    // AI enhanced formatters for more versatility and to prevent bugs from user input
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
+    private static final DateTimeFormatter DATETIME_FORMAT_DASH = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
+    private static final DateTimeFormatter DATETIME_FORMAT_DOT = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy");
+
     /**
      * Method that parses input from user and decides which command to execute
      *
      * @param fullCommand Whole line from user to parse
+     * @return executable Command object
      * @throws VulpesException if any part of line is not issued in format expected
      */
     public static Command parse(String fullCommand) throws VulpesException { // parses full command string, only interprets and packages; supersedes the prior processor
-        String[] parts = fullCommand.trim().split(" ", 2);
-        String command = parts[0].toLowerCase();
+        String[] parts = fullCommand.trim().split(" ", 2); // split command from rest of the params
+        String command = parts[0].toLowerCase(); // handle case issues
         String params = (parts.length > 1) ? parts[1].trim() : ""; // handle spaces
 
         switch (command) { // only passing back to command, no execution
@@ -46,6 +42,9 @@ public class Parser {
 
         case "archives":
             return new ArchivesCommand();
+
+        case "help!":
+            return new HelpCommand();
 
         case "archive": // fallthrough
         case "unarchive":
@@ -69,6 +68,30 @@ public class Parser {
     }
 
     /**
+     * Method to parse datetime string from input
+     * Made more robust with AI help - tries multiple formats - time-only, time with date
+     *
+     * @param dateTimeString The string to parse, e.g., "20:00" or "21:00 24-11-2025".
+     * @return A LocalDateTime object. If only time is provided, it defaults to today's date.
+     * @throws DateTimeParseException if the string cannot be parsed with any known format.
+     */
+    private static LocalDateTime parseDateTimeString(String dateTimeString) throws DateTimeParseException {
+        // parse as full date and time first (dash format)
+        try {
+            return LocalDateTime.parse(dateTimeString, DATETIME_FORMAT_DASH);
+        } catch (DateTimeParseException e) { /* Fall through to the next format */ }
+
+        // try dot format
+        try {
+            return LocalDateTime.parse(dateTimeString, DATETIME_FORMAT_DOT);
+        } catch (DateTimeParseException e) { /* Fall through to the next format */ }
+
+        // Finally, try to parse as time-only. Throws exception if this also fails.
+        LocalTime time = LocalTime.parse(dateTimeString, TIME_FORMAT);
+        return LocalDate.now().atTime(time); // Defaults to today's date
+    }
+
+    /**
      * Method that handles addition of new task to list
      * Includes checks and handlers to ensure data is valid for execution
      *
@@ -76,32 +99,30 @@ public class Parser {
      * @param params Required parameters for proper execution of specified command
      * @throws VulpesException if any part of line is not issued in format expected
      */
-    private static AddCommand parseAdd(String command, String params) throws VulpesException { // handlers moved
+    private static AddCommand parseAdd(String command, String params) throws VulpesException { // had some AI tuneups
+        // https://www.baeldung.com/java-combine-local-date-time
+        // https://www.geeksforgeeks.org/java/java-time-localtime-class-in-java/
+        // https://www.baeldung.com/java-comparing-dates
+
         if (params.isEmpty()) {
             throw new InvalidParametersException(command); // specific exception for command that has invalid params
         }
-
-        LocalDateTime datetime; // from or by
-        LocalDateTime datetime2; // to
 
         switch (command) {
         case "todo":
             if (params.contains(" /by") || params.contains(" /from") || params.contains(" /to")) {
                 throw new InvalidDatetimeFormatException("todo cannot use time keywords like /by, /from, or /to!");
             }
-
             return new AddCommand(Command.TaskType.TODO, params); // create if checks passed
 
         case "deadline":
             if (!params.contains(" /by ")) {
-                throw new InvalidDatetimeFormatException("deadline command requires '/by' keyword!");
+                throw new InvalidDatetimeFormatException("todo cannot use time keywords like /by, /from, or /to!");
             }
-            String[] deadlineParts = params.split(" /by ", 2); // lump the time and date into one index in the array, if both time and date exists
-            String deadlineDescription = deadlineParts[0].trim();
-            String deadlineBy = (deadlineParts.length > 1) ? deadlineParts[1].trim() : "";
-
-            if (deadlineDescription.isEmpty() || deadlineBy.isEmpty()) {
-                throw new InvalidParametersException(command); // specific exception for command that has invalid params
+            String[] parts = params.split(" /by ", 2); // lump the time and date into one index in the array, if both time and date exists
+            String description = parts[0].trim();
+            if (description.isEmpty() || parts.length < 2 || parts[1].trim().isEmpty()) {
+                throw new InvalidParametersException("Deadline description and date/time cannot be empty.");
             }
 
             // time : hh:mm in 24hr, date : dd-mm-yyyy
@@ -110,101 +131,51 @@ public class Parser {
             // deadline description time date
             // only accept in certain format
 
-            deadlineBy = deadlineBy.trim();
+            String byString = parts[1].trim(); // handle spaces
 
-            if (deadlineBy.length() == 5) { // time only
-                try {
-                    datetime = LocalDate.now().atTime(LocalTime.parse(deadlineBy)); // https://www.baeldung.com/java-combine-local-date-time // https://www.geeksforgeeks.org/java/java-time-localtime-class-in-java/
-                } catch (java.time.format.DateTimeParseException e) {
+            try {
+                LocalDateTime by = parseDateTimeString(byString);
+                if (by.isBefore(LocalDateTime.now())) {
                     throw new InvalidDatetimeException(); // specific exception for invalid datetime
                 }
-            } else if (deadlineBy.length() == 16) { // assume user is keying in both time and date
-                try {
-                    datetime = LocalDateTime.parse(deadlineBy);
-                } catch (java.time.format.DateTimeParseException e) {
-                    throw new InvalidDatetimeException(); // specific exception for invalid datetime
-                }
-            } else {
-                throw new InvalidDatetimeException(); // specific exception for invalid datetime format
+                return new AddCommand(Command.TaskType.DEADLINE, description, by); // create if checks passed
+            } catch (DateTimeParseException e) {
+                throw new InvalidDatetimeFormatException("deadline requires '/by' keyword!");
             }
-
-            if (datetime.isBefore(LocalDateTime.now())) { // take it that entering deadlines right as of this current minute is acceptable still ; https://www.baeldung.com/java-comparing-dates
-                throw new InvalidDatetimeException(); // specific exception for invalid datetime
-            }
-
-            return new AddCommand(Command.TaskType.DEADLINE, deadlineDescription, datetime); // create if checks passed
 
         case "event":
             if (!params.contains(" /from ") || !params.contains(" /to ")) {
-                throw new InvalidDatetimeFormatException("event requires '/from' and '/to' keywords!");
+                throw new InvalidDatetimeFormatException("Event requires '/from' and '/to' keywords.");
             }
-
             String[] fromParts = params.split(" /from ", 2); // lump from and to into one index in the array
-            String eventDescription = fromParts[0].trim();
+            description = fromParts[0].trim(); // handle spaces
 
-            if (fromParts.length < 2) {
-                throw new InvalidParametersException(command); // specific exception for command that has invalid params
+            if (description.isEmpty() || fromParts.length < 2) {
+                throw new InvalidParametersException("Event requires a description and date/times.");
             }
-
             String[] toParts = fromParts[1].split(" /to ", 2); // split from and to, both have date and time lumped together (if date and time both exists)
-
-            if (toParts.length < 2) {
-                throw new InvalidParametersException(command); // specific exception for command that has invalid params
+            if (toParts.length < 2 || toParts[0].trim().isEmpty() || toParts[1].trim().isEmpty()) {
+                throw new InvalidParametersException(command); // missing params
             }
+            String fromString = toParts[0].trim(); // handle spaces
+            String toString = toParts[1].trim(); // handle spaces
 
-            String eventFrom = toParts[0].trim();
-            String eventTo = toParts[1].trim();
+            try {
+                LocalDateTime from = parseDateTimeString(fromString);
+                LocalDateTime to = parseDateTimeString(toString);
 
-            if (eventDescription.isEmpty() || eventFrom.isEmpty() || eventTo.isEmpty()) {
-                throw new InvalidParametersException(command); // specific exception for command that has invalid params
-            }
-
-            // time : hh:mm in 24hr, date : dd-mm-yyyy
-            // allow user 3 options
-            // event description time time -> defaults to today
-            // event description time time date -> from time today to datetime
-            // event description time date time date
-            // only accept in certain format, todo: flesh out datetime, not in interest of time at the moment
-
-            eventFrom = eventFrom.trim();
-
-            if (eventFrom.length() == 5 && eventTo.length() == 5) { // event description time time
-                try {
-                    datetime = LocalDate.now().atTime(LocalTime.parse(eventFrom)); // https://www.baeldung.com/java-combine-local-date-time // https://www.geeksforgeeks.org/java/java-time-localtime-class-in-java/
-                    datetime2 = LocalDate.now().atTime(LocalTime.parse(eventTo));
-                } catch (java.time.format.DateTimeParseException e) {
+                if (to.isBefore(from)) {
                     throw new InvalidDatetimeException(); // specific exception for invalid datetime
                 }
-            } else if (eventFrom.length() == 5 && eventTo.length() == 16) { // event description time time date
-                try {
-                    datetime = LocalDate.now().atTime(LocalTime.parse(eventFrom));
-                    datetime2 =  LocalDateTime.parse(eventTo);
-                } catch (java.time.format.DateTimeParseException e) {
+                if (to.isBefore(LocalDateTime.now())) {
                     throw new InvalidDatetimeException(); // specific exception for invalid datetime
                 }
-            } else if (eventFrom.length() == 16 && eventTo.length() == 16) { // event description time date time date
-                try {
-                    datetime = LocalDateTime.parse(eventFrom);
-                    datetime2 = LocalDateTime.parse(eventTo);
-                } catch (java.time.format.DateTimeParseException e) {
-                    throw new InvalidDatetimeException(); // specific exception for invalid datetime
-                }
-            } else {
-                   throw new InvalidDatetimeException(); // specific exception for invalid datetime format
+                return new AddCommand(Command.TaskType.EVENT, description, from, to); // create if checks passed
+            } catch (DateTimeParseException e) {
+                throw new InvalidDatetimeFormatException("formatting is quite off..."); // General format error
             }
-
-            if (datetime2.isBefore(LocalDateTime.now())) { // take it that entering deadlines right as of this current minute is acceptable still ; take it that entering MissingParametersException from datetime before this moment is fine too, only emd date datetime before this moment not acceptable
-                throw new InvalidDatetimeException(); // specific exception for invalid datetime
-            }
-
-            if (datetime2.isBefore(datetime)) {
-                throw new InvalidDatetimeException(); // specific exception for invalid datetime
-            }
-
-            return new AddCommand(Command.TaskType.EVENT, eventDescription, datetime, datetime2); // create if checks passed
-
-        default: // lets hope we dont get here
-            throw new CriticalException();
+        default:
+            throw new CriticalException(); // Should be unreachable
         }
     }
 
