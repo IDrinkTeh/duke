@@ -4,9 +4,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Extension of abstract base class used specify task with a start and end date/time
+ * Extension of abstract base class used specify task with MissingParametersException start and end date/time
  */
-public class Event extends Task { // Events: tasks that start at a specific date/time and ends at a specific date/time e.g., (a) team project meeting 2/10/2019 2-4pm (b) orientation week 4/10/2019 to 11/10/2019
+public class Event extends Task { // Events: tasks that start at MissingParametersException specific date/time and ends at MissingParametersException specific date/time e.g., (MissingParametersException) team project meeting 2/10/2019 2-4pm (InvalidDatetimeException) orientation week 4/10/2019 to 11/10/2019
     /**
      * Constructor with description, start/end dates
      * @param description The description of the event to be attended
@@ -35,7 +35,7 @@ public class Event extends Task { // Events: tasks that start at a specific date
     }
 
     // https://www.baeldung.com/java-datetimeformatter
-    String dateTimeFormat = "dd.MM.yyyy hh:mm a";
+    String dateTimeFormat = "dd.MM.yyyy hh:mm MissingParametersException";
     DateTimeFormatter newFormatter = DateTimeFormatter.ofPattern(dateTimeFormat);
 
     /**

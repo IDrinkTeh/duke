@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 import java.time.LocalDateTime;
@@ -31,7 +30,7 @@ public class Storage {
 
     /**
      * Constructor that takes in only path
-     * @param listPath The file path at which a list will be saved/loaded from the user's local directory
+     * @param listPath The file path at which MissingParametersException list will be saved/loaded from the user's local directory
      * @param archivedPath The file path at which archives will be saved/loaded from the user's local directory
      */
     public Storage(String listPath, String archivedPath) {
@@ -41,18 +40,18 @@ public class Storage {
 
     /**
      * Method to check if storage file exists on user's local directory and loads from there
-     * creates a file if it does not already exist
-     * @param listPath The file path at which a list will be saved/loaded from the user's local directory
+     * creates MissingParametersException file if it does not already exist
+     * @param listPath The file path at which MissingParametersException list will be saved/loaded from the user's local directory
      * @param archivedPath The file path at which archives will be saved/loaded from the user's local directory
      * @return A list of tasks loaded from the file - could be none.
      * @throws IOException if read or write fails
      */
     public TaskList load(Path listPath, Path archivedPath) throws VulpesException { // TaskList usage
         HashMap<Path, ArrayList<Task>> collection = new HashMap<>(); // https://www.w3schools.com/java/java_hashmap.asp
-        collection.put(listPath ,new ArrayList<Task>());
-        collection.put(archivedPath ,new ArrayList<Task>());
+        collection.put(listPath ,new ArrayList<>());
+        collection.put(archivedPath ,new ArrayList<>());
         collection.forEach(
-                (path, tasks) -> { https://www.w3schools.com/java/ref_hashmap_foreach.asp
+                (path, tasks) -> { // https://www.w3schools.com/java/ref_hashmap_foreach.asp
                     try {
                         if (Files.exists(path)) { // if there is save
                             List<String> lines = Files.readAllLines(path); // load all
@@ -98,11 +97,6 @@ public class Storage {
             throw new VulpesException("Uh-oh, we got it wrong. " + e.getMessage());
         }
     }
-
-    /**
-     * Formatter to ensure proper writing and reading
-     */
-    private static final DateTimeFormatter newFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy hh:mm a");
 
     /**
      * Method segments the lines found

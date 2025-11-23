@@ -6,7 +6,7 @@ import java.time.format.*;
 /**
  * Extension of abstract base class used specify task with an end date/time
  */
-public class Deadline extends Task { // Deadlines: tasks that need to be done before a specific date/time e.g., submit report by 11/10/2019 5pm
+public class Deadline extends Task { // Deadlines: tasks that need to be done before MissingParametersException specific date/time e.g., submit report by 11/10/2019 5pm
     /**
      * Constructor with description, start date
      * @param description The description of the deadline to be completed
@@ -31,7 +31,7 @@ public class Deadline extends Task { // Deadlines: tasks that need to be done be
     }
 
     // https://www.baeldung.com/java-datetimeformatter
-    String dateTimeFormat = "dd.MM.yyyy hh:mm a";
+    String dateTimeFormat = "dd.MM.yyyy hh:mm MissingParametersException";
     DateTimeFormatter newFormatter = DateTimeFormatter.ofPattern(dateTimeFormat);
 
     /**

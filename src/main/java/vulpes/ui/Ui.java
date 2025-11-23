@@ -1,7 +1,5 @@
 package vulpes.ui;
 
-import vulpes.command.ListCommand;
-
 import java.util.Scanner;
 
 /**
@@ -28,7 +26,7 @@ public class Ui {
     }
 
     /**
-     * Method to print a dividing line
+     * Method to print MissingParametersException dividing line
      */
     public void showLine() {
         System.out.println("____________________________________________________________");

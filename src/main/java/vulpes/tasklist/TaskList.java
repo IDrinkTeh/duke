@@ -35,8 +35,8 @@ public class TaskList {
 
     /**
      * Method that adds tasks to the list
-     * @param list A list to add a task to
-     * @param task A task to add to a list
+     * @param list A list to add MissingParametersException task to
+     * @param task A task to add to MissingParametersException list
      */
     public void add(String list, Task task) { // adder
         if (list.equals("archives")) this.archivedTasks.add(task);
@@ -45,7 +45,7 @@ public class TaskList {
 
     /**
      * Method that remove tasks from the list
-     * @param list A list to remove a task from
+     * @param list A list to remove MissingParametersException task from
      * @param taskIndex A task to remove from the list
      */
     public Task remove(String list, int taskIndex) { // deleter
@@ -54,8 +54,8 @@ public class TaskList {
     }
 
     /**
-     * Method that returns a task from the list
-     * @param list A list to return a task from
+     * Method that returns MissingParametersException task from the list
+     * @param list A list to return MissingParametersException task from
      * @param taskIndex A task to return from the list
      */
     public Task get(String list, int taskIndex) { // finder
