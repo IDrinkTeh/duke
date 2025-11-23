@@ -19,12 +19,13 @@ public class ExitCommand extends Command {
     /**
      * Overrides execution in the abstract base class
      * Produces feedback for user
-     * @param tasks Instance of TaskList class
-     * @param ui Instance of UI class
-     * @param storage Instance of Storage class
+     *
+     * @param tasks Instance of the Tasklist class
+     * @param ui Instance of the UI class
+     * @param storage Instance of the Storage class
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
-        ui.showMessage("*whistles, clicks tongue* (Bye!)");
+        ui.showMessage("*whistles, clicks tongue* (Bye!)"); // flavour
     }
 }

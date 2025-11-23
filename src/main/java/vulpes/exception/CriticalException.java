@@ -5,6 +5,6 @@ package vulpes.exception;
  */
 public class CriticalException extends VulpesException {
     public CriticalException() {
-        super("In the end, we all die. Unless you change. (Pack it up boys... this app is cooked)");
+        super("In the to, we all die. Unless you change. (Pack it up boys... this app is cooked)");
     }
 }

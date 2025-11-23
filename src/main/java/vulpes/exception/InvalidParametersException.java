@@ -5,7 +5,7 @@ package vulpes.exception;
  */
 public class InvalidParametersException extends VulpesException {
     public InvalidParametersException(String command) {
-        super("I'm sorry. Maybe my invitation got lost in the mail... ('" + command + "' requires valid details!).\n" +
+        super("I'm sorry. Maybe my invitation got lost in the mail... ('" + command + "' requires valid details!)\n" +
                 "(Please enter the correct parameters or type 'help!' for... help.)"
         );
     }

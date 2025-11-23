@@ -6,7 +6,7 @@ package vulpes.exception;
 public class InvalidCommandException extends VulpesException {
     public InvalidCommandException() {
         super(
-                "I don't know what you're talking about, but it sounds illegal. (Command entered is not recognised).\n" +
+                "I don't know what you're talking about, but it sounds illegal. (Command entered is not recognised)\n" +
                         "(Please enter another command or type 'help!' for... help.)"
         );
     }

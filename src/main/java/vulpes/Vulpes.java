@@ -9,33 +9,32 @@ import vulpes.ui.Ui;
 
 import java.nio.file.Path;
 
-
 /**
- * // <MissingParametersException href="https://letterboxd.com/film/fantastic-mr-fox/">...</MissingParametersException>
+ * // <a href="https://letterboxd.com/film/fantastic-mr-fox/">...</MissingParametersException>
  * Credits to Google and Google Gemini, W3Schools, StackOverflow and to LeeJiaHao's Repo for some ideas (L0/1/2 only)
  * A028761[8]M for the individual features : B-ViewSchedules / C-Archive / B-FixedDurationTasks
  * C-Archive selected
+ * TextUiTesting omitted due to time constraints
  */
 
 public class Vulpes {
-    //TODO: TextUiTesting if time allows
-
-    private Storage storage;
-    private Ui ui;
-    private TaskList tasks;
+    private Storage storage; // allocation for Storage instance
+    private Ui ui; // allocation for Ui instance
+    private TaskList tasks; // allocation for Tasklist instance
     /**
      * Definition of classes specified in 'run' method
+     *
      * @param listPath The file path at which the list will be saved/loaded from the user's local directory
      * @param archivesPath The file path at which the archives will be saved/loaded from the user's local directory
      */
     public Vulpes(String listPath, String archivesPath) {
-        ui = new Ui();
-        storage = new Storage(listPath, archivesPath);
+        ui = new Ui(); // instantiate Ui
+        storage = new Storage(listPath, archivesPath); // instantiate Storage with paths of list and archives saves on user's local directory (if any)
         try {
-            tasks = storage.load(Path.of(listPath), Path.of(archivesPath));
+            tasks = storage.load(Path.of(listPath), Path.of(archivesPath)); // attempt loading from the paths
         } catch (VulpesException e) {
-            ui.showError("...");
-            tasks = new TaskList(); // start with empty list
+            tasks = new TaskList(); // from with empty list if no saves found
+            // no feedback required to user, app starts as normal
         }
     }
 

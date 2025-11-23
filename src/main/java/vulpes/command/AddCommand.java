@@ -9,7 +9,7 @@ import vulpes.task.Todo;
 import vulpes.tasklist.TaskList;
 import vulpes.ui.Ui;
 
-import java.time.*;
+import java.time.LocalDateTime;
 
 /**
  * Extension of abstract base class used to add tasks to the list
@@ -18,18 +18,9 @@ public class AddCommand extends Command {
 
     private final Command.TaskType type;
     private final String description;
-    /**
-     * For Deadline
-     */
-    private final LocalDateTime by;
-    /**
-     * For Event
-     */
-    private final LocalDateTime from;
-    /**
-     * For Event
-     */
-    private final LocalDateTime to;
+    private final LocalDateTime by; // For Deadline
+    private final LocalDateTime from; // For Event
+    private final LocalDateTime to; // For Event
 
     /**
      * Constructor for To-do, no by, from, to
@@ -69,6 +60,11 @@ public class AddCommand extends Command {
      * Specifies which task type to create
      * Produces feedback for user
      * Calls storage to save once task added to list
+     *
+     * @param tasks Instance of the Tasklist class
+     * @param ui Instance of the UI class
+     * @param storage Instance of the Storage class
+     * @throws VulpesException Execution will throw custom exceptions
      */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws VulpesException {
@@ -89,12 +85,13 @@ public class AddCommand extends Command {
                 return;
         }
 
-        tasks.add("", newTask);
+        tasks.add("", newTask); // adds new task to list of tasks
 
+        // flavour
         ui.showMessage("Another target added to the list:");
-        ui.showMessage("  " + newTask.toString());
+        ui.showMessage("  " + newTask);
         ui.showMessage("Now you have " + tasks.size("") + " targets in the list at the moment.");
 
-        storage.save("", tasks.getAllTasks(""));
+        storage.save("", tasks.getAllTasks("")); // save into list
     }
 }

@@ -9,14 +9,14 @@ import vulpes.ui.Ui;
  * Abstract base class used to contain methods for executing user commands
  */
 public abstract class Command { // to be extended
-    public abstract void execute(TaskList tasks, Ui ui, Storage storage) throws VulpesException;
-
-    /**
-     * Exit flag is false by default until it is time to say goodbye
-     */
     public boolean isExit() { // default no
         return false;
-    }
+    } // flag is false by default until it is time to exit app
+
+    /**
+     * Abstract base method for execute in run
+     */
+    public abstract void execute(TaskList tasks, Ui ui, Storage storage) throws VulpesException;
 
     /**
      * Limits the tasks to 3 types

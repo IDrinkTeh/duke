@@ -8,8 +8,6 @@ public abstract class Task { // made abstract to prevent instantiation
     protected boolean isDone; // mark/unmark flag
     // priority scrapped, replaced with Task type
 
-    //TODO: enums for priority if time allows?
-
     /**
      * Constructor with no params, abstract class will not be instantiated
      */
@@ -19,9 +17,9 @@ public abstract class Task { // made abstract to prevent instantiation
      * Placeholder method to override Java default class for formatted printing
      */
     @Override
-    public String toString() {
+    public String toString() { // suggested by AI to streamline printing and respect OOP
         return "";
-    } // suggested by AI to streamline printing and respect OOP
+    }
 
     /**
      * Placeholder method for writing to file
@@ -34,7 +32,7 @@ public abstract class Task { // made abstract to prevent instantiation
      * Method to set protected variable
      */
     public void setStatus(boolean status) {
-        this.isDone = status;
+        this.isDone = status; // set from param
     }
 
     /**
@@ -57,6 +55,5 @@ public abstract class Task { // made abstract to prevent instantiation
     public String getDescription() {
         return this.description;
     }
-
     // earlier methods to get and set priority removed, not needed; never changed once first created
 }

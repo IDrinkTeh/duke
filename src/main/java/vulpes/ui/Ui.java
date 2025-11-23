@@ -19,14 +19,15 @@ public class Ui {
      * Method to greet the user upon app launch
      */
     public void showWelcome() {
+        // flavour galore
         showLine();
         System.out.println("Canis Lupus? Vulpes vulpes!");
-        System.out.println("All right, let's start planning. Who knows shorthand?");
+        System.out.println("All right, let's from planning. Who knows shorthand?");
         showLine();
     }
 
     /**
-     * Method to print MissingParametersException dividing line
+     * Method to print a dividing line
      */
     public void showLine() {
         System.out.println("____________________________________________________________");
@@ -41,6 +42,7 @@ public class Ui {
 
     /**
      * Method to append default error indication to error message presented to user
+     *
      * @param message The actual exception/error to display to user
      */
     public void showError(String message) {
@@ -49,6 +51,7 @@ public class Ui {
 
     /**
      * Method to print to user
+     *
      * @param message The message to output to user
      */
     public void showMessage(String message) {
