@@ -75,3 +75,40 @@ public class Vulpes {
         new Vulpes("data/Vulpes.txt", "data/Archives.txt").run();
     }
 }
+
+/* List of all sources used as below (Im sorry I didnt really keep track of where I used some of them but I could at least collate them from my search history):
+
+https://www.geeksforgeeks.org/java/java-time-localdate-class-in-java/
+https://www.w3schools.com/java/java_ref_arraylist.asp
+https://www.w3schools.com/java/java_enums.asp
+https://www.geeksforgeeks.org/java/java-time-localdatetime-class-in-java/
+https://www.w3schools.com/git/git_branch.asp
+https://www.w3schools.com/java/ref_string_trim.asp
+https://www.w3schools.com/java/java_polymorphism.asp
+https://www.w3schools.com/java/java_ref_string.asp
+https://www.w3schools.com/java/ref_scanner_hasnext.asp
+https://www.w3schools.com/java/java_switch.asp
+https://www.w3schools.com/java/java_ref_scanner.asp
+https://www.w3schools.com/java/java_encapsulation.asp
+https://www.w3schools.com/java/java_interface.asp
+https://www.w3schools.com/java/java_inheritance.asp
+https://www.w3schools.com/java/java_hashmap.asp
+https://stackoverflow.com/questions/19533625/how-to-pass-a-function-an-array-literal
+https://stackoverflow.com/questions/10963878/how-do-you-fork-your-own-repository-on-github
+https://stackoverflow.com/questions/5003285/how-can-interfaces-replace-the-need-for-multiple-inheritance-when-have-existing
+https://stackoverflow.com/questions/12162688/inheriting-from-multiple-classes-in-java-and-possibly-not-using-interface
+https://stackoverflow.com/questions/767821/is-else-if-faster-than-switch-case
+https://stackoverflow.com/questions/9128737/fastest-way-to-set-all-values-of-an-array
+https://stackoverflow.com/questions/1062960/map-implementation-with-duplicate-keys
+https://stackoverflow.com/questions/1062960/map-implementation-with-duplicate-keys
+https://stackoverflow.com/questions/2754339/java-how-do-i-create-an-array-of-tuples
+https://stackoverflow.com/questions/21676150/setup-git-in-intellij-terminal
+https://stackoverflow.com/questions/24368788/what-is-the-alternative-for-while0-or-while1-in-java
+https://stackoverflow.com/questions/3528420/why-do-we-need-interfaces-in-java
+https://stackoverflow.com/questions/3528420/why-do-we-need-interfaces-in-java
+https://www.baeldung.com/find-list-element-java
+https://www.geeksforgeeks.org/java/localdatetime-parse-method-in-java-with-examples/
+https://www.w3schools.com/java/java_try_catch.asp
+https://www.geeksforgeeks.org/java/java-time-localtime-class-in-java/
+
+ */
