@@ -168,6 +168,14 @@ public class Parser {
             if (toParts.length < 2 || toParts[0].trim().isEmpty() || toParts[1].trim().isEmpty()) {
                 throw new InvalidParametersException(command); // missing params
             }
+
+            // time : hh:mm in 24hr, date : dd-mm-yyyy
+            // allow user 3 options
+            // deadline description time time -> defaults to today
+            // deadline description time time date -> start date defaults to today
+            // deadline description time date time date
+            // only accept in certain format
+
             String fromString = toParts[0].trim(); // handle spaces
             String toString = toParts[1].trim(); // handle spaces
 
