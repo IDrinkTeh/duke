@@ -36,6 +36,11 @@ public class Vulpes {
             tasks = new TaskList(); // from with empty list if no saves found
             // no feedback required to user, app starts as normal
         }
+
+        // none of below core components should be null if constructor is done
+        assert ui != null : "UI object must be initialized.";
+        assert storage != null : "Storage must be initialized.";
+        assert tasks != null : "TaskList must be initialized.";
     }
 
     /**
@@ -49,6 +54,10 @@ public class Vulpes {
                 String fullCommand = ui.readCommand();
                 ui.showLine(); // show the divider line ("_______")
                 Command c = Parser.parse(fullCommand);
+
+                // assume parse() will always be !null; null here is catastrophical
+                assert c != null : "parse() returned null.";
+
                 c.execute(tasks, ui, storage);
                 isExit = c.isExit();
             } catch (VulpesException e) {

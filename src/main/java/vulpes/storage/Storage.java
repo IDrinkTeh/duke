@@ -1,6 +1,5 @@
 package vulpes.storage;
 
-import vulpes.exception.InvalidDatetimeFormatException;
 import vulpes.exception.InvalidLoadFormatException;
 import vulpes.exception.VulpesException;
 import vulpes.exception.StorageException;
@@ -36,6 +35,10 @@ public class Storage {
      * @param archivedPath The file path at which archives will be saved/loaded from the user's local directory
      */
     public Storage(String listPath, String archivedPath) {
+        // non-null paths is what the constructor will expect
+        assert listPath != null && !listPath.isBlank() : "listPath found null or blank.";
+        assert archivedPath != null && !archivedPath.isBlank() : "archivedPath found null or blank.";
+
         this.listPath = Paths.get(listPath);
         this.archivesPath = Paths.get(archivedPath);
     }
@@ -53,6 +56,11 @@ public class Storage {
     public TaskList load(Path listPath, Path archivedPath) throws StorageException, InvalidLoadFormatException {
         // whole load method was reworked to compartmentalise earlier messy logic and reduce nesting
         // helper method used for delegation and to remain in line with OOP principles
+
+        // non-null paths are expected to be provided by caller
+        assert listPath != null : "listPath parameter null.";
+        assert archivedPath != null : "archivedPath parameter null.";
+
         ArrayList<Task> listTasks = loadList(listPath);
         ArrayList<Task> archivesTasks = loadList(archivedPath);
         return new TaskList(listTasks, archivesTasks);
@@ -69,6 +77,9 @@ public class Storage {
      * @throws InvalidLoadFormatException If one of more lines in loaded file is corrupted
      */
     private ArrayList<Task> loadList(Path path) throws StorageException, InvalidLoadFormatException { // AI improved method from the earlier arrowhead code junk
+        // valid path must be present for this method call
+        assert path != null : "Path was null.";
+
         ArrayList<Task> tasks = new ArrayList<>(); // new empty list
         try {
             if (!Files.exists(path)) { // if there is no save path
@@ -97,6 +108,10 @@ public class Storage {
      * @throws VulpesException if read or write fails
      */
     public void save(String list, ArrayList<Task> tasks) throws VulpesException {
+        // method expects non-null list
+        assert tasks != null : "Null task list was provided.";
+        assert list != null : "Identifier was null.";
+
         try {
             ArrayList<String> linesToWrite = new ArrayList<>(); // temp list
             for (Task task : tasks) {
@@ -119,6 +134,9 @@ public class Storage {
      * @throws InvalidLoadFormatException if data is not formatted the way it was expected to be
      */
     private static Task parseLineToTask(String line) throws InvalidLoadFormatException { // AI improved method from the earlier arrowhead code junk
+        // empty or blank lines should already be removed
+        assert line != null && !line.isBlank() : "Line passed was blank or null.";
+
         String[] parts = line.split("\\|"); // specify delimiters
 
         if (parts.length < 3) {

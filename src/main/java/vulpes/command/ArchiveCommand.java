@@ -41,7 +41,7 @@ public class ArchiveCommand extends Command {
     public void execute(TaskList tasks, Ui ui, Storage storage) throws VulpesException {
         if (status) { // archival flag
             if (taskIndex <= 0 || taskIndex > tasks.size("")) { // check for index out of bounds
-                throw new InvalidTaskException(taskIndex, tasks.size(""));
+                throw new InvalidTaskException("list", taskIndex, tasks.size(""));
             }
             Task transferTask = tasks.remove("", taskIndex - 1); // accounted for index
             tasks.add("archives", transferTask); // add to archives
@@ -53,7 +53,7 @@ public class ArchiveCommand extends Command {
 
         } else { // un-archival flag
             if (taskIndex <= 0 || taskIndex > tasks.size("archives")) { // check for index out of bounds
-                throw new InvalidTaskException(taskIndex, tasks.size(""));
+                throw new InvalidTaskException("archives", taskIndex, tasks.size("archives"));
             }
             Task transferTask = tasks.remove("archives", taskIndex - 1); // accounted for index
             tasks.add("", transferTask); // add to list

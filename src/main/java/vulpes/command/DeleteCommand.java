@@ -36,7 +36,7 @@ public class DeleteCommand extends Command {
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws VulpesException {
         if (taskIndex <= 0 || taskIndex > tasks.size("")) { // check for index out of bounds
-            throw new InvalidTaskException(taskIndex, tasks.size(""));
+            throw new InvalidTaskException("list", taskIndex, tasks.size(""));
         }
 
         Task removedTask = tasks.remove("", taskIndex - 1); // accounted for index

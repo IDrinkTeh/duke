@@ -186,7 +186,8 @@ public class Parser {
                 throw new InvalidParametersException("event");
             }
         default:
-            throw new CriticalException(); // Should be unreachable
+            assert false : "Somehow hit unreachable case in parseAdd. Command was: " + command;
+            throw new CriticalException(); // just in case assertions are disabled during testing
         }
     }
 

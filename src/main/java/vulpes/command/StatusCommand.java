@@ -39,7 +39,7 @@ public class StatusCommand extends Command {
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws VulpesException {
         if (taskIndex <= 0 || taskIndex > tasks.size("")) { // check for index out of bounds
-            throw new InvalidTaskException(taskIndex, tasks.size(""));
+            throw new InvalidTaskException("list", taskIndex, tasks.size(""));
         }
 
         Task taskToUpdate = tasks.get("", taskIndex - 1); // accounted for index
